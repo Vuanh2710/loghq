@@ -3,55 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TMS Logistics Pro - Demo Version</title>
+  <title>TMS Logistics Pro - Full System</title>
   
-  <!-- Libraries -->
+  <!-- 1. Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 2. React Core -->
   <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  
+  <!-- 3. Recharts -->
   <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
   <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
+  
+  <!-- 4. Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .custom-checkbox { cursor: pointer; accent-color: #2563eb; width: 16px; height: 16px; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-600 overflow-hidden">
+<body>
+
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useMemo, useRef, useEffect } = React;
+    const { useState, useMemo, useEffect } = React;
     const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } = Recharts;
 
     // --- ICONS ---
-    const Icon = ({ path, ...props }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>{path}</svg>);
-    const Truck = (p) => <Icon {...p} path={<><path d="M5 18H3c-.6 0-1-.4-1-1V9c0-.6.4-1 1-1h9v10h-2"/><path d="M14 18H9"/><path d="M19 18h2c.6 0 1-.4 1-1v-5.6c0-.3-.1-.5-.3-.7l-2-2.9c-.2-.2-.5-.3-.8-.3H16v9h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></>} />;
-    const Users = (p) => <Icon {...p} path={<><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>} />;
-    const Package = (p) => <Icon {...p} path={<><path d="m16.5 9.4-9-5.19"/><path d="m21 16-9 5.19-9-5.19"/><path d="m3.11 6.04 9 5.2 9-5.2"/><path d="M12 2v20"/></>} />;
-    const BarChart3 = (p) => <Icon {...p} path={<><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></>} />;
-    const Settings = (p) => <Icon {...p} path={<><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.35a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></>} />;
-    const Plus = (p) => <Icon {...p} path={<><path d="M5 12h14"/><path d="M12 5v14"/></>} />;
-    const Search = (p) => <Icon {...p} path={<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>} />;
-    const CheckCircle = (p) => <Icon {...p} path={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />;
-    const DollarSign = (p) => <Icon {...p} path={<><line x1="12" x2="12" y1="1" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>} />;
-    const LogOut = (p) => <Icon {...p} path={<><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></>} />;
-    const Edit = (p) => <Icon {...p} path={<><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></>} />;
-    const Trash2 = (p) => <Icon {...p} path={<><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></>} />;
-    const Save = (p) => <Icon {...p} path={<><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></>} />;
-    const X = (p) => <Icon {...p} path={<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>} />;
-    const UploadCloud = (p) => <Icon {...p} path={<><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></>} />;
-    const Download = (p) => <Icon {...p} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></>} />;
-    const TrendingUp = (p) => <Icon {...p} path={<><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>} />;
-    const TrendingDown = (p) => <Icon {...p} path={<><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></>} />;
-    const PieChartIcon = (p) => <Icon {...p} path={<><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></>} />;
+    const Icon = ({ path, className = "w-5 h-5" }) => (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{path}</svg>);
+    
+    const Icons = {
+      Truck: <Icon path={<><path d="M5 18H3c-.6 0-1-.4-1-1V9c0-.6.4-1 1-1h9v10h-2"/><path d="M14 18H9"/><path d="M19 18h2c.6 0 1-.4 1-1v-5.6c0-.3-.1-.5-.3-.7l-2-2.9c-.2-.2-.5-.3-.8-.3H16v9h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></>} />,
+      Users: <Icon path={<><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>} />,
+      Package: <Icon path={<><path d="m16.5 9.4-9-5.19"/><path d="m21 16-9 5.19-9-5.19"/><path d="m3.11 6.04 9 5.2 9-5.2"/><path d="M12 2v20"/></>} />,
+      Chart: <Icon path={<><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></>} />,
+      Settings: <Icon path={<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>} />,
+      Plus: <Icon path={<><path d="M5 12h14"/><path d="M12 5v14"/></>} />,
+      Search: <Icon path={<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>} />,
+      Dollar: <Icon path={<><line x1="12" x2="12" y1="1" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>} />,
+      Logout: <Icon path={<><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></>} />,
+      Edit: <Icon path={<><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></>} />,
+      Close: <Icon path={<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>} />,
+      Upload: <Icon path={<><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></>} />,
+      Download: <Icon path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></>} />,
+      Filter: <Icon path={<><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></>} />,
+      Pie: <Icon path={<><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></>} />,
+      TrendDown: <Icon path={<><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></>} />,
+      Shield: <Icon path={<><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></>} />,
+      Wallet: <Icon path={<><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></>} />,
+      FileText: <Icon path={<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></>} />,
+      Trash: <Icon path={<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></>} />
+    };
+
+    // --- UTILS ---
+    const formatCurrency = (amount, currency = 'VND') => {
+      if (!amount) return '0';
+      if (currency === 'WON') return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(amount);
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    };
+
+    const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
     // --- MOCK DATA ---
     const INITIAL_ROUTES = [
@@ -61,35 +84,302 @@
     ];
 
     const INITIAL_CUSTOMERS = [
-      { id: 'C001', name: 'Nguyễn Văn A (Đại lý)', phone: '0901234567', type: 'Agency', debt: 15000000, pricePolicies: { 'R001': 165000, 'R003': 7000 } },
-      { id: 'C002', name: 'Trần Thị B (Khách lẻ)', phone: '0987654321', type: 'Retail', debt: 0, pricePolicies: {} },
-      { id: 'C003', name: 'Công ty Logistics XYZ', phone: '0243999888', type: 'Partner', debt: 50000000, pricePolicies: { 'R001': 160000, 'R002': 170000 } },
+      { id: 'KH001', name: 'Nguyễn Văn A (Đại lý)', phone: '0901234567', type: 'Agency', debt: 1550000, pricePolicies: { 'R001': 165000, 'R003': 7000 } },
+      { id: 'KH002', name: 'Trần Thị B (Lẻ)', phone: '0987654321', type: 'Retail', debt: 0, pricePolicies: {} },
+      { id: 'KH003', name: 'Logistics XYZ (Partner)', phone: '0243999888', type: 'Partner', debt: 50000000, pricePolicies: { 'R001': 160000, 'R002': 170000 } },
     ];
 
     const INITIAL_ORDERS = [
-      { id: 'ORD-1001', packageCode: 'HV5-1921', date: '2025-08-14', customerId: 'C001', routeId: 'R001', senderNote: '39-TUẤN ZALO', paymentStatus: 'paid', receiverName: 'Dinh thi lan anh', receiverPhone: '0946750124', receiverAddress: 'Thanh Hoá', area: 'TỈNH LẺ HN', weight: 1.9, unitPrice: 6500, totalCost: 14350, totalCostVND: 280000, carrier: 'J&T', trackingCode: '848392112', profit: 4090, status: 'arrived_center', currency: 'WON' },
-      { id: 'ORD-1002', packageCode: 'HV5-1923', date: '2025-08-14', customerId: 'C002', routeId: 'R001', senderNote: '10 BOX TEM', paymentStatus: 'imported', receiverName: 'Nguyệt', receiverPhone: '0987314107', receiverAddress: 'Hà Nội', area: 'HN', weight: 8.7, unitPrice: 6000, totalCost: 52200, totalCostVND: 1044000, carrier: 'Xe khách', trackingCode: '', profit: 8700, status: 'arrived_center', currency: 'WON' },
-      { id: 'ORD-1003', packageCode: 'HCM-2022', date: '2025-08-15', customerId: 'C003', routeId: 'R002', senderNote: 'Khách VIP', paymentStatus: 'payment_sent', receiverName: 'Anh Minh', receiverPhone: '0909090909', receiverAddress: 'HCM', area: 'HCM', weight: 15.5, unitPrice: 170000, totalCost: 2635000, totalCostVND: 2635000, carrier: 'GHTK', trackingCode: 'SGN123456', profit: 500000, status: 'shipping', currency: 'VND' },
-      { id: 'ORD-1004', packageCode: 'HAN-2023', date: '2025-08-16', customerId: 'C001', routeId: 'R003', senderNote: 'Nội địa', paymentStatus: 'unpaid', receiverName: 'Chị Lan', receiverPhone: '0912345678', receiverAddress: 'Đà Nẵng', area: 'DN', weight: 50, unitPrice: 7000, totalCost: 350000, totalCostVND: 350000, carrier: 'Xe tải', trackingCode: '', profit: 100000, status: 'new', currency: 'VND' }
+      { id: 'ORD-001', packageCode: 'HV5-1921', date: '2025-08-14', customerId: 'KH001', routeId: 'R001', senderNote: '39-TUẤN ZALO', paymentStatus: 'paid', receiverName: 'Lan Anh', receiverPhone: '0946750124', receiverAddress: 'Thanh Hoá', area: 'TỈNH LẺ', weight: 1.9, unitPrice: 6500, totalCost: 12350, carrier: 'J&T', trackingCode: '848392112', profit: 4090, status: 'arrived_center', currency: 'WON' },
+      { id: 'ORD-002', packageCode: 'HV5-1923', date: '2025-08-14', customerId: 'KH002', routeId: 'R001', senderNote: '10 BOX TEM', paymentStatus: 'imported', receiverName: 'Nguyệt', receiverPhone: '0987314107', receiverAddress: 'Hà Nội', area: 'HN', weight: 8.7, unitPrice: 6000, totalCost: 52200, carrier: 'Xe khách', trackingCode: '', profit: 8700, status: 'arrived_center', currency: 'WON' },
+      { id: 'ORD-003', packageCode: 'SGN-2022', date: '2025-08-15', customerId: 'KH003', routeId: 'R002', senderNote: 'Khách VIP', paymentStatus: 'payment_sent', receiverName: 'Anh Minh', receiverPhone: '0909090909', receiverAddress: 'HCM', area: 'HCM', weight: 15.5, unitPrice: 170000, totalCost: 2635000, carrier: 'GHTK', trackingCode: 'SGN123456', profit: 500000, status: 'shipping', currency: 'WON' },
+      { id: 'ORD-004', packageCode: 'ND-999', date: '2025-08-16', customerId: 'KH001', routeId: 'R003', senderNote: 'Hàng tạp hóa', paymentStatus: 'unpaid', receiverName: 'Chị Lan', receiverPhone: '0912345678', receiverAddress: 'Đà Nẵng', area: 'DN', weight: 50, unitPrice: 7000, totalCost: 350000, carrier: 'Xe tải', trackingCode: '', profit: 100000, status: 'new', currency: 'VND' }
     ];
 
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+    const INITIAL_USERS = [
+      { id: 'U001', name: 'Admin System', email: 'admin@tms.com', role: 'admin' },
+      { id: 'U002', name: 'Nhân viên Vận hành', email: 'operator@tms.com', role: 'operator' },
+      { id: 'U003', name: 'Kế toán trưởng', email: 'accountant@tms.com', role: 'accountant' },
+    ];
 
-    const formatCurrency = (amount, currency = 'VND') => {
-      if (amount === undefined || amount === null) return '0';
-      if (currency === 'WON') return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(amount);
-      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    // --- COMPONENTS ---
+
+    // 1. ORDERS VIEW
+    const OrdersView = ({ orders, customers, currentUserRole, onEdit, onAdd }) => {
+      const [filter, setFilter] = useState({ packageCode: '', customerId: '' });
+      const [selectedOrders, setSelectedOrders] = useState([]);
+      
+      const filteredList = useMemo(() => orders.filter(o => {
+        if (filter.packageCode && !o.packageCode.toLowerCase().includes(filter.packageCode.toLowerCase())) return false;
+        if (filter.customerId && o.customerId !== filter.customerId) return false;
+        return true;
+      }), [orders, filter]);
+
+      const handleSelectAll = (e) => {
+        if (e.target.checked) setSelectedOrders(filteredList.map(o => o.id));
+        else setSelectedOrders([]);
+      };
+
+      const handleSelectOne = (id) => {
+        if (selectedOrders.includes(id)) setSelectedOrders(selectedOrders.filter(x => x !== id));
+        else setSelectedOrders([...selectedOrders, id]);
+      };
+
+      const getPaymentBadge = (s) => {
+        const map = { unpaid: 'bg-red-50 text-red-600 border-red-200', imported: 'bg-slate-100 text-slate-600 border-slate-300', payment_sent: 'bg-yellow-50 text-yellow-600 border-yellow-200', paid: 'bg-green-50 text-green-600 border-green-200' };
+        const label = { unpaid: 'Chưa TT', imported: 'Đã nhập', payment_sent: 'Đã gửi TT', paid: 'Đã TT' };
+        return <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${map[s] || map.unpaid}`}>{label[s] || s}</span>;
+      };
+
+      return (
+        <div className="flex flex-col h-full space-y-4 animate-fade-in w-full">
+          <div className="flex justify-between items-end shrink-0">
+            <div><h2 className="text-2xl font-bold text-slate-800">Quản lý Đơn hàng</h2><p className="text-sm text-slate-500">Nhập liệu và đối soát vận đơn</p></div>
+            <div className="flex gap-2">
+              {selectedOrders.length > 0 && (
+                <button className="bg-white border border-blue-200 text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm text-sm font-medium hover:bg-blue-50 transition-colors animate-fade-in" onClick={()=>alert(`Xuất hóa đơn cho ${selectedOrders.length} đơn hàng!`)}>
+                  {Icons.FileText} Xuất hóa đơn ({selectedOrders.length})
+                </button>
+              )}
+              {currentUserRole !== 'accountant' && (
+                <button onClick={onAdd} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow text-sm font-medium transition-colors">{Icons.Plus} Tạo đơn mới</button>
+              )}
+            </div>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-wrap gap-3 items-center shrink-0">
+            <div className="relative w-48"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{Icons.Search}</span><input className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-sm focus:border-blue-500 outline-none" placeholder="Tìm Mã kiện..." value={filter.packageCode} onChange={e => setFilter({...filter, packageCode: e.target.value})} /></div>
+            <div className="w-56"><select className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm outline-none bg-white" value={filter.customerId} onChange={e => setFilter({...filter, customerId: e.target.value})}><option value="">-- Lọc theo Khách hàng --</option>{customers.map(c => <option key={c.id} value={c.id}>{c.id} - {c.name}</option>)}</select></div>
+            <div className="flex-1 flex justify-end gap-2"><button className="text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded flex gap-2 text-sm hover:bg-green-100">{Icons.Upload} Nhập Excel</button><button className="text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded flex gap-2 text-sm hover:bg-blue-100">{Icons.Download} Xuất Excel</button></div>
+          </div>
+          <div className="bg-white rounded-lg border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm min-h-0">
+            <div className="overflow-auto flex-1 h-full w-full">
+              <table className="w-full text-xs text-left border-collapse">
+                <thead className="bg-slate-100 text-slate-600 font-bold uppercase sticky top-0 z-20 shadow-sm">
+                  <tr>
+                    <th className="p-3 border-b border-r w-10 text-center"><input type="checkbox" className="custom-checkbox" onChange={handleSelectAll} checked={selectedOrders.length === filteredList.length && filteredList.length > 0} /></th>
+                    <th className="p-3 border-b border-r min-w-[90px]">Ngày</th><th className="p-3 border-b border-r min-w-[110px]">Mã kiện</th><th className="p-3 border-b border-r min-w-[80px]">Mã KH</th><th className="p-3 border-b border-r min-w-[150px]">Khách hàng</th><th className="p-3 border-b border-r min-w-[110px] text-center">Thanh toán</th><th className="p-3 border-b border-r min-w-[180px]">Người nhận</th><th className="p-3 border-b border-r min-w-[60px] text-center">KG</th><th className="p-3 border-b border-r min-w-[100px] text-right">Thành tiền</th>{currentUserRole === 'admin' && <th className="p-3 border-b border-r min-w-[90px] text-right text-green-700">Lợi nhuận</th>}<th className="p-3 border-b border-r min-w-[130px]">Vận chuyển NĐ</th><th className="p-3 border-b text-center w-[80px]">Sửa</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredList.map((order, idx) => {
+                    const customer = customers.find(c => c.id === order.customerId);
+                    return (
+                      <tr key={order.id} className={`hover:bg-blue-50 transition-colors ${selectedOrders.includes(order.id) ? 'bg-blue-50' : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50')}`}>
+                        <td className="p-2 border-r text-center"><input type="checkbox" className="custom-checkbox" checked={selectedOrders.includes(order.id)} onChange={() => handleSelectOne(order.id)} /></td>
+                        <td className="p-2 border-r text-slate-500 whitespace-nowrap">{order.date}</td>
+                        <td className="p-2 border-r font-bold text-blue-700 whitespace-nowrap">{order.packageCode}</td>
+                        <td className="p-2 border-r font-mono text-slate-500">{order.customerId}</td>
+                        <td className="p-2 border-r truncate max-w-[150px]"><div className="font-medium text-slate-800">{customer?.name}</div><div className="text-[10px] text-slate-400">{order.senderNote}</div></td>
+                        <td className="p-2 border-r text-center">{getPaymentBadge(order.paymentStatus)}</td>
+                        <td className="p-2 border-r truncate max-w-[180px]"><div className="font-medium">{order.receiverName}</div><div className="text-[10px] text-slate-400">{order.receiverAddress}</div></td>
+                        <td className="p-2 border-r text-center font-medium">{order.weight}</td>
+                        <td className="p-2 border-r text-right font-bold text-slate-700">{formatCurrency(order.totalCost, order.currency)}</td>
+                        {currentUserRole === 'admin' && <td className="p-2 border-r text-right text-green-600 font-bold">{formatCurrency(order.profit, order.currency)}</td>}
+                        <td className="p-2 border-r">{order.carrier ? <div className="flex flex-col"><span className="font-semibold text-[10px]">{order.carrier}</span><span className="text-[9px] font-mono bg-slate-100 px-1 rounded w-fit">{order.trackingCode}</span></div> : <span className="text-[10px] italic text-slate-400">--</span>}</td>
+                        <td className="p-2 text-center"><button onClick={() => onEdit(order)} className="text-slate-400 hover:text-blue-600 p-1.5 rounded hover:bg-blue-100 transition-colors">{Icons.Edit}</button></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
     };
 
+    // 2. FINANCE VIEW
+    const FinanceView = ({ orders, customers }) => {
+      const debtData = useMemo(() => {
+        return customers.map(c => {
+          const customerOrders = orders.filter(o => o.customerId === c.id);
+          const totalDebtWON = customerOrders.filter(o => o.currency === 'WON' && o.paymentStatus !== 'paid').reduce((sum, o) => sum + o.totalCost, 0);
+          const totalDebtVND = customerOrders.filter(o => o.currency === 'VND' && o.paymentStatus !== 'paid').reduce((sum, o) => sum + o.totalCost, 0);
+          return { ...c, totalDebtWON, totalDebtVND };
+        }).filter(c => c.totalDebtWON > 0 || c.totalDebtVND > 0);
+      }, [orders, customers]);
+
+      return (
+        <div className="flex flex-col h-full space-y-4 animate-fade-in w-full">
+          <div className="flex justify-between items-center"><h2 className="text-2xl font-bold text-slate-800">Tài chính & Công nợ</h2><button className="bg-green-600 text-white px-4 py-2 rounded-lg flex gap-2 text-sm font-medium hover:bg-green-700 shadow">{Icons.Dollar} Tạo Phiếu Thu</button></div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
+                <div><p className="text-sm text-slate-500">Tổng công nợ (WON)</p><p className="text-2xl font-bold text-red-600">{formatCurrency(debtData.reduce((sum, c) => sum + c.totalDebtWON, 0), 'WON')}</p></div>
+                <div className="p-3 bg-red-50 rounded-full text-red-600">{Icons.TrendDown}</div>
+             </div>
+             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
+                <div><p className="text-sm text-slate-500">Tổng công nợ (VND)</p><p className="text-2xl font-bold text-red-600">{formatCurrency(debtData.reduce((sum, c) => sum + c.totalDebtVND, 0), 'VND')}</p></div>
+                <div className="p-3 bg-red-50 rounded-full text-red-600">{Icons.TrendDown}</div>
+             </div>
+          </div>
+
+          <div className="bg-white rounded-lg border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm">
+            <div className="p-4 border-b bg-slate-50 font-bold text-slate-700">Danh sách Khách hàng còn nợ</div>
+            <div className="overflow-auto flex-1">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-white text-slate-600 sticky top-0 border-b"><tr><th className="p-4">Mã KH</th><th className="p-4">Khách hàng</th><th className="p-4">SĐT</th><th className="p-4 text-right">Nợ (WON)</th><th className="p-4 text-right">Nợ (VND)</th><th className="p-4 text-center">Thao tác</th></tr></thead>
+                <tbody className="divide-y">
+                  {debtData.map(c => (
+                    <tr key={c.id} className="hover:bg-slate-50">
+                      <td className="p-4 font-mono text-slate-500">{c.id}</td>
+                      <td className="p-4 font-medium">{c.name}</td>
+                      <td className="p-4">{c.phone}</td>
+                      <td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.totalDebtWON, 'WON')}</td>
+                      <td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.totalDebtVND, 'VND')}</td>
+                      <td className="p-4 text-center"><button className="text-blue-600 hover:underline text-xs" onClick={()=>alert(`Xem chi tiết công nợ khách ${c.name}`)}>Chi tiết</button></td>
+                    </tr>
+                  ))}
+                  {debtData.length === 0 && <tr><td colSpan="6" className="p-8 text-center text-slate-400">Không có khách hàng nào đang nợ.</td></tr>}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 3. SYSTEM ACCOUNTS VIEW
+    const AccountsView = ({ users, onAdd, onDelete }) => {
+      return (
+        <div className="flex flex-col h-full space-y-4 animate-fade-in w-full">
+          <div className="flex justify-between items-center"><h2 className="text-2xl font-bold text-slate-800">Quản trị Hệ thống</h2><button onClick={onAdd} className="bg-slate-800 text-white px-4 py-2 rounded-lg flex gap-2 text-sm font-medium hover:bg-slate-900 shadow">{Icons.Plus} Thêm tài khoản</button></div>
+          <div className="bg-white rounded-lg border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-slate-100 text-slate-600"><tr><th className="p-4">ID</th><th className="p-4">Tên hiển thị</th><th className="p-4">Email</th><th className="p-4">Vai trò</th><th className="p-4 text-center">Trạng thái</th><th className="p-4 text-center">Thao tác</th></tr></thead>
+              <tbody className="divide-y">
+                {users.map(u => (
+                  <tr key={u.id} className="hover:bg-slate-50">
+                    <td className="p-4 font-mono text-slate-500">{u.id}</td>
+                    <td className="p-4 font-medium">{u.name}</td>
+                    <td className="p-4">{u.email}</td>
+                    <td className="p-4"><span className={`px-2 py-1 rounded text-xs uppercase font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'accountant' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{u.role}</span></td>
+                    <td className="p-4 text-center"><span className="text-green-600 text-xs font-bold flex items-center justify-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500"></span> Online</span></td>
+                    <td className="p-4 text-center"><button onClick={()=>onDelete(u.id)} className="text-red-400 hover:text-red-600 p-2">{Icons.Trash}</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    };
+
+    // 4. REPORTS VIEW
+    const ReportsView = ({ orders, customers, routes }) => {
+      const [rFilter, setRFilter] = useState({ start: '', end: '', customer: '' });
+      
+      const reportData = useMemo(() => orders.filter(o => {
+        if (rFilter.start && o.date < rFilter.start) return false;
+        if (rFilter.end && o.date > rFilter.end) return false;
+        if (rFilter.customer && o.customerId !== rFilter.customer) return false;
+        return true;
+      }), [orders, rFilter]);
+
+      const stats = useMemo(() => {
+        const wonOrders = reportData.filter(o => o.currency === 'WON');
+        const vndOrders = reportData.filter(o => o.currency === 'VND');
+        const calc = (list) => {
+          const revenue = list.reduce((sum, o) => sum + o.totalCost, 0);
+          const paid = list.filter(o => o.paymentStatus === 'paid').reduce((sum, o) => sum + o.totalCost, 0);
+          return { revenue, paid, debt: revenue - paid };
+        };
+        return { won: calc(wonOrders), vnd: calc(vndOrders) };
+      }, [reportData]);
+
+      const chartData = useMemo(() => {
+        const map = {};
+        reportData.forEach(o => { 
+           const name = customers.find(c => c.id === o.customerId)?.name || 'Unknown';
+           map[name] = (map[name] || 0) + (o.currency === 'WON' ? o.totalCost * 20 : o.totalCost); 
+        });
+        return Object.entries(map).map(([k, v]) => ({ name: k, value: v })).sort((a,b) => b.value - a.value).slice(0, 5);
+      }, [reportData, customers]);
+
+      return (
+        <div className="flex flex-col h-full space-y-4 animate-fade-in overflow-hidden w-full">
+          <h2 className="text-2xl font-bold text-slate-800 shrink-0">Báo cáo Tài chính</h2>
+          <div className="bg-white p-3 rounded-lg border shadow-sm flex gap-4 items-end shrink-0">
+            <div><label className="text-xs font-semibold text-slate-500">Từ ngày</label><input type="date" className="border rounded px-2 py-1 text-sm w-32" value={rFilter.start} onChange={e=>setRFilter({...rFilter, start: e.target.value})}/></div>
+            <div><label className="text-xs font-semibold text-slate-500">Đến ngày</label><input type="date" className="border rounded px-2 py-1 text-sm w-32" value={rFilter.end} onChange={e=>setRFilter({...rFilter, end: e.target.value})}/></div>
+            <div className="flex-1"><label className="text-xs font-semibold text-slate-500">Khách hàng</label><select className="border rounded px-2 py-1 text-sm w-full max-w-xs" value={rFilter.customer} onChange={e=>setRFilter({...rFilter, customer: e.target.value})}><option value="">-- Tất cả --</option>{customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+            <button onClick={()=>setRFilter({start:'', end:'', customer:''})} className="text-sm text-red-500 hover:underline px-2 py-1">Xóa lọc</button>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 shrink-0">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="bg-blue-50 px-4 py-2 border-b border-blue-100 flex justify-between items-center"><h3 className="font-bold text-blue-800 flex gap-2">{Icons.Dollar} Tuyến Hàn (WON)</h3></div>
+              <div className="p-4 grid grid-cols-2 gap-4">
+                <div><p className="text-xs text-slate-500">Tổng doanh thu</p><p className="text-lg font-bold text-slate-800">{formatCurrency(stats.won.revenue, 'WON')}</p></div>
+                <div><p className="text-xs text-slate-500">Đã thu</p><p className="text-lg font-bold text-green-600">{formatCurrency(stats.won.paid, 'WON')}</p></div>
+                <div className="col-span-2 pt-2 border-t border-dashed flex justify-between items-end"><div><p className="text-xs font-bold text-red-500">Còn nợ</p><p className="text-2xl font-bold text-red-600">{formatCurrency(stats.won.debt, 'WON')}</p></div><div className="text-right"><p className="text-xs text-slate-400">Tỷ lệ nợ</p><p className="text-xl font-bold text-slate-700">{stats.won.revenue ? ((stats.won.debt/stats.won.revenue)*100).toFixed(1) : 0}%</p></div></div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="bg-orange-50 px-4 py-2 border-b border-orange-100 flex justify-between items-center"><h3 className="font-bold text-orange-800 flex gap-2">{Icons.Truck} Nội địa (VND)</h3></div>
+              <div className="p-4 grid grid-cols-2 gap-4">
+                <div><p className="text-xs text-slate-500">Tổng doanh thu</p><p className="text-lg font-bold text-slate-800">{formatCurrency(stats.vnd.revenue, 'VND')}</p></div>
+                <div><p className="text-xs text-slate-500">Đã thu</p><p className="text-lg font-bold text-green-600">{formatCurrency(stats.vnd.paid, 'VND')}</p></div>
+                <div className="col-span-2 pt-2 border-t border-dashed flex justify-between items-end"><div><p className="text-xs font-bold text-red-500">Còn nợ</p><p className="text-2xl font-bold text-red-600">{formatCurrency(stats.vnd.debt, 'VND')}</p></div><div className="text-right"><p className="text-xs text-slate-400">Tỷ lệ nợ</p><p className="text-xl font-bold text-slate-700">{stats.vnd.revenue ? ((stats.vnd.debt/stats.vnd.revenue)*100).toFixed(1) : 0}%</p></div></div>
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 min-h-0 flex gap-4">
+            <div className="w-1/3 bg-white rounded-xl shadow-sm border p-4 flex flex-col">
+              <h4 className="font-bold text-slate-700 mb-2 text-sm">Top Khách hàng (Quy đổi)</h4>
+              <div className="flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} layout="vertical" margin={{top:5, right:30, left:20, bottom:5}}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false}/><XAxis type="number" hide /><YAxis dataKey="name" type="category" width={80} tick={{fontSize: 10}} /><Tooltip formatter={(v)=>formatCurrency(v, 'VND')} /><Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="w-2/3 bg-white rounded-xl shadow-sm border flex flex-col overflow-hidden">
+              <div className="p-3 border-b bg-slate-50 font-bold text-slate-700 text-sm">Chi tiết giao dịch trong kỳ</div>
+              <div className="flex-1 overflow-auto">
+                <table className="w-full text-xs text-left"><thead className="bg-white sticky top-0 shadow-sm text-slate-500"><tr><th className="p-2">Ngày</th><th className="p-2">Mã đơn</th><th className="p-2">Khách hàng</th><th className="p-2 text-right">Doanh thu</th><th className="p-2 text-right">Loại tiền</th></tr></thead><tbody className="divide-y">{reportData.map(o => (<tr key={o.id} className="hover:bg-slate-50"><td className="p-2">{o.date}</td><td className="p-2 font-medium text-blue-600">{o.packageCode}</td><td className="p-2 text-slate-600">{customers.find(c=>c.id===o.customerId)?.name}</td><td className="p-2 text-right font-bold">{formatCurrency(o.totalCost, o.currency)}</td><td className="p-2 text-right text-xs text-slate-400">{o.currency}</td></tr>))}</tbody></table>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 5. CUSTOMERS VIEW
+    const CustomersView = ({ customers, routes, onAdd, onEdit }) => {
+      return (
+        <div className="space-y-4 animate-fade-in h-full flex flex-col w-full">
+          <div className="flex justify-between items-center shrink-0"><h2 className="text-2xl font-bold text-slate-800">Khách hàng & Bảng giá</h2><button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex gap-2 text-sm">{Icons.Plus} Thêm mới</button></div>
+          <div className="bg-white rounded-lg border shadow-sm flex-1 overflow-hidden flex flex-col">
+            <div className="overflow-auto flex-1">
+              <table className="w-full text-sm text-left"><thead className="bg-slate-100 text-slate-600 sticky top-0"><tr><th className="p-4">Mã</th><th className="p-4">Tên khách hàng</th><th className="p-4">Loại</th><th className="p-4">SĐT</th><th className="p-4 text-right">Công nợ</th><th className="p-4 text-center">Giá riêng</th><th className="p-4 text-center">Sửa</th></tr></thead><tbody className="divide-y">{customers.map(c=>(<tr key={c.id} className="hover:bg-slate-50"><td className="p-4 text-slate-500">{c.id}</td><td className="p-4 font-medium">{c.name}</td><td className="p-4"><span className="bg-slate-100 px-2 py-1 rounded text-xs">{c.type}</span></td><td className="p-4">{c.phone}</td><td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.debt)}</td><td className="p-4 text-center">{Object.keys(c.pricePolicies).length > 0 ? <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">{Object.keys(c.pricePolicies).length} giá</span> : '-'}</td><td className="p-4 text-center"><button onClick={()=>onEdit(c)} className="text-blue-600">{Icons.Edit}</button></td></tr>))}</tbody></table>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 6. ROUTES VIEW
+    const RoutesView = ({ routes, onAdd, onEdit }) => {
+      return (
+        <div className="space-y-4 animate-fade-in w-full">
+          <div className="flex justify-between items-center"><h2 className="text-2xl font-bold text-slate-800">Cấu hình Tuyến</h2><button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex gap-2 text-sm">{Icons.Plus} Thêm tuyến</button></div>
+          <div className="bg-white rounded-lg border shadow-sm overflow-hidden"><table className="w-full text-sm text-left"><thead className="bg-slate-100 text-slate-600"><tr><th className="p-4">Mã</th><th className="p-4">Tên Tuyến</th><th className="p-4">Loại</th><th className="p-4">Tiền tệ</th><th className="p-4 text-right">Giá Cost</th><th className="p-4 text-right">Giá Base</th><th className="p-4 text-center">Sửa</th></tr></thead><tbody className="divide-y">{routes.map(r=>(<tr key={r.id} className="hover:bg-slate-50"><td className="p-4 text-slate-500">{r.id}</td><td className="p-4 font-medium">{r.name}</td><td className="p-4">{r.type}</td><td className="p-4"><span className="bg-slate-100 px-2 py-1 rounded text-xs font-bold">{r.currency}</span></td><td className="p-4 text-right">{formatCurrency(r.costPrice, r.currency)}</td><td className="p-4 text-right font-bold text-blue-600">{formatCurrency(r.basePrice, r.currency)}</td><td className="p-4 text-center"><button onClick={()=>onEdit(r)} className="text-blue-600">{Icons.Edit}</button></td></tr>))}</tbody></table></div>
+        </div>
+      );
+    };
+
+    // --- MAIN CONTROLLER COMPONENT ---
     function TMSApp() {
-      // --- STATE ---
+      // Global State
       const [activeTab, setActiveTab] = useState('orders');
       const [currentUserRole, setCurrentUserRole] = useState('admin');
       
       const [routes, setRoutes] = useState(INITIAL_ROUTES);
       const [customers, setCustomers] = useState(INITIAL_CUSTOMERS);
       const [orders, setOrders] = useState(INITIAL_ORDERS);
-      
+      const [users, setUsers] = useState(INITIAL_USERS);
+
       // Modal States
       const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
       const [editingOrder, setEditingOrder] = useState(null);
@@ -98,331 +388,235 @@
       const [isRouteModalOpen, setIsRouteModalOpen] = useState(false);
       const [editingRoute, setEditingRoute] = useState(null);
 
-      // --- LOGIC: ORDER ---
-      const [orderForm, setOrderForm] = useState({
-        packageCode: '', customerId: '', routeId: '', senderNote: '', receiverName: '', receiverPhone: '', receiverAddress: '', weight: '', paymentStatus: 'unpaid', carrier: '', trackingCode: '', status: 'new'
-      });
+      // Form States
+      const [oForm, setOForm] = useState({});
+      const [cForm, setCForm] = useState({});
+      const [rForm, setRForm] = useState({});
 
-      const calculatedPriceInfo = useMemo(() => {
-        if (!orderForm.customerId || !orderForm.routeId || !orderForm.weight) return null;
-        const route = routes.find(r => r.id === orderForm.routeId);
-        const customer = customers.find(c => c.id === orderForm.customerId);
-        if (!route || !customer) return null;
+      // Permission Logic
+      const canAccess = (module) => {
+        if (currentUserRole === 'admin') return true;
+        if (currentUserRole === 'operator') return ['orders', 'customers'].includes(module);
+        if (currentUserRole === 'accountant') return ['orders', 'reports', 'finance', 'customers'].includes(module);
+        return false;
+      };
 
-        const specialPrice = customer.pricePolicies?.[route.id];
-        const appliedPrice = specialPrice !== undefined ? Number(specialPrice) : route.basePrice;
-        const weight = parseFloat(orderForm.weight);
-        
-        const currency = route.currency || 'VND';
-        const totalRaw = weight * appliedPrice;
-        const totalVND = currency === 'WON' ? totalRaw * 20 : totalRaw; 
-        const cost = weight * route.costPrice;
-        const profit = totalRaw - (currency === 'WON' ? cost : cost); 
-
-        return { appliedPrice, totalRaw, totalVND, profit, currency, isSpecial: specialPrice !== undefined };
-      }, [orderForm, routes, customers]);
-
+      // -- Handlers --
+      // Order
+      const handleOpenOrderModal = (order = null) => {
+        setEditingOrder(order);
+        setOForm(order || { packageCode: '', customerId: '', routeId: '', senderNote: '', receiverName: '', receiverPhone: '', receiverAddress: '', weight: '', paymentStatus: 'unpaid', carrier: '', trackingCode: '', status: 'new' });
+        setIsOrderModalOpen(true);
+      };
+      
       const handleSaveOrder = () => {
-        if (!calculatedPriceInfo) return;
-        const orderData = {
-          ...orderForm,
-          id: editingOrder ? editingOrder.id : `ORD-${Math.floor(Math.random() * 100000)}`,
+        const r = routes.find(x => x.id === oForm.routeId);
+        const c = customers.find(x => x.id === oForm.customerId);
+        if (!r || !oForm.weight) return;
+        const price = (c && c.pricePolicies[r.id]) ? c.pricePolicies[r.id] : r.basePrice;
+        const total = parseFloat(oForm.weight) * price;
+        const payload = {
+          ...oForm,
+          id: editingOrder ? editingOrder.id : `ORD-${Date.now()}`,
           date: editingOrder ? editingOrder.date : new Date().toISOString().split('T')[0],
-          unitPrice: calculatedPriceInfo.appliedPrice,
-          totalCost: calculatedPriceInfo.totalRaw,
-          totalCostVND: calculatedPriceInfo.totalVND,
-          profit: calculatedPriceInfo.profit,
-          currency: calculatedPriceInfo.currency,
-          area: 'Auto'
+          unitPrice: price,
+          totalCost: total,
+          currency: r.currency,
+          profit: total - (parseFloat(oForm.weight) * r.costPrice)
         };
-        if (editingOrder) {
-          setOrders(orders.map(o => o.id === editingOrder.id ? orderData : o));
-        } else {
-          setOrders([orderData, ...orders]);
-        }
+        if (editingOrder) setOrders(orders.map(o => o.id === editingOrder.id ? payload : o));
+        else setOrders([payload, ...orders]);
         setIsOrderModalOpen(false);
       };
 
-      const openCreateModal = () => { setEditingOrder(null); setOrderForm({ packageCode: '', customerId: '', routeId: '', senderNote: '', receiverName: '', receiverPhone: '', receiverAddress: '', weight: '', paymentStatus: 'unpaid', carrier: '', trackingCode: '', status: 'new' }); setIsOrderModalOpen(true); };
-      const openEditModal = (order) => { setEditingOrder(order); setOrderForm({ ...order }); setIsOrderModalOpen(true); };
+      // Customer
+      const handleOpenCustomerModal = (customer = null) => {
+        setEditingCustomer(customer);
+        setCForm(customer || { name: '', phone: '', type: 'Retail', pricePolicies: {} });
+        setIsCustomerModalOpen(true);
+      };
 
-      // --- LOGIC: CUSTOMER ---
-      const handleSaveCustomer = (formData) => {
-        if (editingCustomer) {
-          setCustomers(customers.map(c => c.id === editingCustomer.id ? { ...formData, id: editingCustomer.id } : c));
-        } else {
-          const newId = `C${String(customers.length + 1).padStart(3, '0')}`;
-          setCustomers([{ ...formData, id: newId, debt: 0 }, ...customers]);
-        }
+      const handleSaveCustomer = () => {
+        if (editingCustomer) setCustomers(customers.map(c => c.id === editingCustomer.id ? { ...cForm, id: editingCustomer.id } : c));
+        else setCustomers([...customers, { ...cForm, id: `KH${Date.now()}`, debt: 0 }]);
         setIsCustomerModalOpen(false);
       };
 
-      // --- LOGIC: ROUTE ---
-      const handleSaveRoute = (formData) => {
-        if (editingRoute) {
-          setRoutes(routes.map(r => r.id === editingRoute.id ? { ...formData, id: editingRoute.id } : r));
-        } else {
-          const newId = `R${String(routes.length + 1).padStart(3, '0')}`;
-          setRoutes([...routes, { ...formData, id: newId }]);
-        }
+      const updatePriceMatrix = (routeId, val) => {
+        setCForm(prev => ({
+          ...prev,
+          pricePolicies: { ...prev.pricePolicies, [routeId]: val ? Number(val) : undefined }
+        }));
+      };
+
+      // Route
+      const handleOpenRouteModal = (route = null) => {
+        setEditingRoute(route);
+        setRForm(route || { name: '', type: 'Air', currency: 'VND', basePrice: 0, costPrice: 0 });
+        setIsRouteModalOpen(true);
+      };
+
+      const handleSaveRoute = () => {
+        if (editingRoute) setRoutes(routes.map(r => r.id === editingRoute.id ? { ...rForm, id: editingRoute.id } : r));
+        else setRoutes([...routes, { ...rForm, id: `R${Date.now()}` }]);
         setIsRouteModalOpen(false);
       };
 
-      const getPaymentBadge = (status) => {
-        const map = { unpaid: { text: 'Chưa TT', color: 'text-red-600 bg-red-50 border-red-100' }, imported: { text: 'Đã nhập file', color: 'text-slate-600 bg-slate-100 border-slate-200' }, payment_sent: { text: 'Đã gửi TT', color: 'text-orange-600 bg-orange-50 border-orange-100' }, paid: { text: 'Đã TT', color: 'text-green-600 bg-green-50 border-green-100' } };
-        const s = map[status] || map.unpaid;
-        return <span className={`px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap border ${s.color}`}>{s.text}</span>;
+      // User
+      const handleAddUser = () => {
+        const name = prompt("Nhập tên người dùng:");
+        const role = prompt("Nhập vai trò (admin/operator/accountant):");
+        if(name && role) setUsers([...users, { id: `U${Date.now()}`, name, email: `${name}@tms.com`, role }]);
       };
 
-      // --- VIEWS ---
-
-      const OrdersView = () => {
-        const [filter, setFilter] = useState({ packageCode: '', customerId: '', status: '' });
-        const filteredOrders = useMemo(() => orders.filter(o => {
-            if (filter.packageCode && !o.packageCode.toLowerCase().includes(filter.packageCode.toLowerCase())) return false;
-            if (filter.customerId && o.customerId !== filter.customerId) return false;
-            return true;
-        }), [orders, filter]);
-
-        return (
-          <div className="flex flex-col h-full space-y-4 animate-fade-in">
-            <div className="flex justify-between items-end">
-              <div><h2 className="text-2xl font-bold text-slate-800">Quản lý Đơn hàng</h2><p className="text-sm text-slate-500">Quản lý vận đơn, trạng thái thanh toán và mã khách hàng</p></div>
-              <button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow-sm flex items-center gap-2 text-sm font-medium"><Plus size={16} /> Tạo đơn mới</button>
-            </div>
-            <div className="bg-white p-3 rounded border border-slate-200 flex flex-wrap gap-3 items-center shadow-sm">
-              <div className="relative w-48"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} /><input type="text" placeholder="Tìm Mã kiện..." className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-sm outline-none focus:border-blue-500" value={filter.packageCode} onChange={e => setFilter({...filter, packageCode: e.target.value})}/></div>
-              <div className="w-48"><select className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm bg-white outline-none focus:border-blue-500" value={filter.customerId} onChange={e => setFilter({...filter, customerId: e.target.value})}><option value="">-- Lọc theo Khách hàng --</option>{customers.map(c => <option key={c.id} value={c.id}>{c.id} - {c.name}</option>)}</select></div>
-              <div className="flex-1 text-right gap-2 flex justify-end"><button className="text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium"><UploadCloud size={16} /> Nhập Excel</button><button className="text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium"><Download size={16} /> Xuất Excel</button></div>
-            </div>
-            <div className="bg-white rounded border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm">
-              <div className="overflow-auto flex-1">
-                <table className="w-full text-sm text-left border-collapse">
-                  <thead className="bg-slate-100 text-slate-600 font-bold text-xs uppercase sticky top-0 z-10 shadow-sm">
-                    <tr><th className="p-3 border-b border-r min-w-[90px]">Ngày</th><th className="p-3 border-b border-r min-w-[100px]">Mã kiện</th><th className="p-3 border-b border-r min-w-[80px]">Mã KH</th><th className="p-3 border-b border-r min-w-[150px]">Khách hàng</th><th className="p-3 border-b border-r min-w-[120px] text-center">Thanh toán</th><th className="p-3 border-b border-r min-w-[180px]">Người nhận</th><th className="p-3 border-b border-r min-w-[60px] text-center">KG</th><th className="p-3 border-b border-r min-w-[100px] text-right">Thành tiền</th>
-                    {currentUserRole === 'admin' && <th className="p-3 border-b border-r min-w-[100px] text-right text-green-700">Lợi nhuận</th>}
-                    <th className="p-3 border-b border-r min-w-[120px]">Vận chuyển NĐ</th><th className="p-3 border-b text-center">Thao tác</th></tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredOrders.map((order) => {
-                      const customer = customers.find(c => c.id === order.customerId);
-                      return (
-                        <tr key={order.id} className="hover:bg-blue-50 transition-colors">
-                          <td className="p-2 border-r text-slate-500 text-xs whitespace-nowrap">{order.date}</td>
-                          <td className="p-2 border-r font-bold text-blue-700 whitespace-nowrap">{order.packageCode}</td>
-                          <td className="p-2 border-r font-mono text-xs text-slate-600">{order.customerId}</td>
-                          <td className="p-2 border-r"><div className="font-medium text-slate-800 text-xs truncate max-w-[140px]">{customer?.name}</div></td>
-                          <td className="p-2 border-r text-center">{getPaymentBadge(order.paymentStatus)}</td>
-                          <td className="p-2 border-r"><div className="text-xs font-medium text-slate-800">{order.receiverName}</div></td>
-                          <td className="p-2 border-r text-center font-medium">{order.weight}</td>
-                          <td className="p-2 border-r text-right"><div className="font-bold text-slate-800 text-xs">{formatCurrency(order.totalCost, order.currency)}</div></td>
-                          {currentUserRole === 'admin' && <td className="p-2 border-r text-right text-green-600 text-xs font-bold">{formatCurrency(order.profit * (order.currency === 'WON' ? 1 : 1), order.currency)}</td>}
-                          <td className="p-2 border-r">{order.carrier ? <span className="text-xs font-semibold text-slate-700">{order.carrier}</span> : <span className="text-[10px] text-slate-400">--</span>}</td>
-                          <td className="p-2 text-center"><button onClick={() => openEditModal(order)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-100 rounded"><Edit size={14} /></button></td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        );
+      const handleDeleteUser = (id) => {
+        if(confirm("Xóa người dùng này?")) setUsers(users.filter(u => u.id !== id));
       };
 
-      const ReportsView = () => {
-        const [reportFilter, setReportFilter] = useState({ startDate: '', endDate: '', customerId: '' });
-        const filteredOrders = useMemo(() => orders.filter(o => {
-            if (reportFilter.startDate && o.date < reportFilter.startDate) return false;
-            if (reportFilter.endDate && o.date > reportFilter.endDate) return false;
-            if (reportFilter.customerId && o.customerId !== reportFilter.customerId) return false;
-            return true;
-        }), [orders, reportFilter]);
+      // Auto Calc Price in Modal
+      const calc = useMemo(() => {
+          if (!oForm.routeId || !oForm.weight) return null;
+          const r = routes.find(x => x.id === oForm.routeId);
+          const c = customers.find(x => x.id === oForm.customerId);
+          if (!r) return null;
+          const price = (c && c.pricePolicies && c.pricePolicies[r.id]) ? c.pricePolicies[r.id] : r.basePrice;
+          const total = parseFloat(oForm.weight) * price;
+          return { price, total, currency: r.currency };
+      }, [oForm.routeId, oForm.customerId, oForm.weight]);
 
-        // Logic Tài chính (đã có từ bước trước)
-        const financialStats = useMemo(() => {
-            const ordersWON = filteredOrders.filter(o => o.currency === 'WON');
-            const ordersVND = filteredOrders.filter(o => o.currency === 'VND');
-            const totalWON = ordersWON.reduce((sum, o) => sum + (o.totalCost || 0), 0);
-            const totalVND = ordersVND.reduce((sum, o) => sum + (o.totalCost || 0), 0);
-            const paidWON = ordersWON.filter(o => o.paymentStatus === 'paid').reduce((sum, o) => sum + (o.totalCost || 0), 0);
-            const paidVND = ordersVND.filter(o => o.paymentStatus === 'paid').reduce((sum, o) => sum + (o.totalCost || 0), 0);
-            return { totalWON, paidWON, debtWON: totalWON - paidWON, totalVND, paidVND, debtVND: totalVND - paidVND };
-        }, [filteredOrders]);
-
-        // Logic Chart (Khôi phục lại)
-        const revenueByCustomer = useMemo(() => {
-          const grouped = {};
-          filteredOrders.forEach(o => { const cName = customers.find(c => c.id === o.customerId)?.name || 'Unknown'; grouped[cName] = (grouped[cName] || 0) + (o.totalCostVND || o.totalCost); });
-          return Object.entries(grouped).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
-        }, [filteredOrders, customers]);
-
-        const revenueByRoute = useMemo(() => {
-          const grouped = {};
-          filteredOrders.forEach(o => { const rName = routes.find(r => r.id === o.routeId)?.name || 'Unknown'; grouped[rName] = (grouped[rName] || 0) + (o.totalCostVND || o.totalCost); });
-          return Object.entries(grouped).map(([name, value]) => ({ name, value }));
-        }, [filteredOrders, routes]);
-
-        return (
-          <div className="space-y-6 animate-fade-in flex flex-col h-full overflow-hidden">
-            <div><h2 className="text-2xl font-bold text-slate-800">Báo cáo Doanh thu & Công nợ</h2></div>
-            {/* Filter Bar */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-end">
-              <div><label className="block text-xs font-semibold text-slate-500 mb-1">Từ ngày</label><input type="date" className="border rounded px-3 py-1.5 text-sm outline-none" value={reportFilter.startDate} onChange={e => setReportFilter({...reportFilter, startDate: e.target.value})}/></div>
-              <div><label className="block text-xs font-semibold text-slate-500 mb-1">Đến ngày</label><input type="date" className="border rounded px-3 py-1.5 text-sm outline-none" value={reportFilter.endDate} onChange={e => setReportFilter({...reportFilter, endDate: e.target.value})}/></div>
-              <div className="w-64"><label className="block text-xs font-semibold text-slate-500 mb-1">Khách hàng</label><select className="w-full border rounded px-3 py-1.5 text-sm outline-none" value={reportFilter.customerId} onChange={e => setReportFilter({...reportFilter, customerId: e.target.value})}><option value="">-- Tất cả --</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-              <button onClick={() => setReportFilter({ startDate: '', endDate: '', customerId: '' })} className="text-sm text-red-500 hover:text-red-700 px-2 py-2">Xóa bộ lọc</button>
-            </div>
-
-            {/* Financial Stats Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 shrink-0">
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="bg-blue-50 px-6 py-3 border-b border-blue-100 flex justify-between items-center"><h3 className="font-bold text-blue-800 flex items-center gap-2"><DollarSign size={18}/> Tài chính Tuyến Hàn (WON)</h3></div>
-                    <div className="p-6 grid grid-cols-2 gap-6">
-                        <div><p className="text-sm text-slate-500 mb-1">Tổng doanh thu</p><p className="text-xl font-bold text-slate-800">{formatCurrency(financialStats.totalWON, 'WON')}</p></div>
-                        <div><p className="text-sm text-slate-500 mb-1">Đã thanh toán</p><p className="text-xl font-bold text-green-600">{formatCurrency(financialStats.paidWON, 'WON')}</p></div>
-                        <div className="col-span-2 pt-4 border-t border-dashed flex justify-between items-end">
-                            <div><p className="text-sm font-bold text-red-500 mb-1 flex items-center gap-1"><TrendingDown size={16}/> Tổng nợ phải thu</p><p className="text-2xl font-bold text-red-600">{formatCurrency(financialStats.debtWON, 'WON')}</p></div>
-                            <div className="text-right"><p className="text-xs text-slate-400">Tỷ lệ nợ</p><p className="text-lg font-bold text-slate-600">{financialStats.totalWON > 0 ? ((financialStats.debtWON / financialStats.totalWON) * 100).toFixed(1) : 0}%</p></div>
-                        </div>
-                    </div>
-                </div>
-                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="bg-orange-50 px-6 py-3 border-b border-orange-100 flex justify-between items-center"><h3 className="font-bold text-orange-800 flex items-center gap-2"><Truck size={18}/> Tài chính Nội địa (VND)</h3></div>
-                    <div className="p-6 grid grid-cols-2 gap-6">
-                        <div><p className="text-sm text-slate-500 mb-1">Tổng doanh thu</p><p className="text-xl font-bold text-slate-800">{formatCurrency(financialStats.totalVND, 'VND')}</p></div>
-                        <div><p className="text-sm text-slate-500 mb-1">Đã thanh toán</p><p className="text-xl font-bold text-green-600">{formatCurrency(financialStats.paidVND, 'VND')}</p></div>
-                         <div className="col-span-2 pt-4 border-t border-dashed flex justify-between items-end">
-                            <div><p className="text-sm font-bold text-red-500 mb-1 flex items-center gap-1"><TrendingDown size={16}/> Tổng nợ phải thu</p><p className="text-2xl font-bold text-red-600">{formatCurrency(financialStats.debtVND, 'VND')}</p></div>
-                            <div className="text-right"><p className="text-xs text-slate-400">Tỷ lệ nợ</p><p className="text-lg font-bold text-slate-600">{financialStats.totalVND > 0 ? ((financialStats.debtVND / financialStats.totalVND) * 100).toFixed(1) : 0}%</p></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Charts Section (Khôi phục) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 shrink-0 h-64">
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 h-full flex flex-col"><h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-slate-700"><BarChart3 size={16}/> Top Khách hàng</h3><div className="flex-1 min-h-0"><ResponsiveContainer width="100%" height="100%"><BarChart data={revenueByCustomer} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" horizontal={false} /><XAxis type="number" tickFormatter={(v) => `${v/1000}k`} fontSize={10} /><YAxis dataKey="name" type="category" width={90} tick={{fontSize: 10}} /><Tooltip formatter={(v) => formatCurrency(v)} contentStyle={{fontSize: '12px'}} /><Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={15} /></BarChart></ResponsiveContainer></div></div>
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 h-full flex flex-col"><h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-slate-700"><PieChartIcon size={16}/> Tỷ trọng theo Tuyến</h3><div className="flex-1 min-h-0"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={revenueByRoute} cx="50%" cy="50%" innerRadius={50} outerRadius={70} fill="#8884d8" paddingAngle={5} dataKey="value">{revenueByRoute.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip formatter={(v) => formatCurrency(v)} contentStyle={{fontSize: '12px'}} /><Legend wrapperStyle={{fontSize: '11px'}} /></PieChart></ResponsiveContainer></div></div>
-            </div>
-
-            {/* List Detail (Khôi phục) */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col min-h-0">
-              <div className="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-slate-700 text-sm">Chi tiết đơn hàng trong kỳ</h3><span className="text-xs text-slate-500">{filteredOrders.length} bản ghi</span></div>
-              <div className="overflow-auto flex-1">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-100 text-slate-600 font-semibold sticky top-0 z-10"><tr><th className="p-2 border-r border-b">Ngày</th><th className="p-2 border-r border-b">Mã đơn</th><th className="p-2 border-r border-b">Mã KH</th><th className="p-2 border-r border-b">Khách hàng</th><th className="p-2 border-r border-b text-center">TT Thanh toán</th><th className="p-2 border-r border-b text-right">Doanh thu</th><th className="p-2 border-b text-right">Loại tiền</th></tr></thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredOrders.map((order) => {
-                      const customer = customers.find(c => c.id === order.customerId);
-                      return (<tr key={order.id} className="hover:bg-slate-50"><td className="p-2 border-r text-slate-500">{order.date}</td><td className="p-2 border-r font-medium text-blue-700">{order.packageCode || order.id}</td><td className="p-2 border-r text-slate-500 font-mono">{order.customerId}</td><td className="p-2 border-r text-slate-700">{customer?.name}</td><td className="p-2 border-r text-center">{getPaymentBadge(order.paymentStatus)}</td><td className="p-2 border-r text-right font-bold text-slate-700">{formatCurrency(order.totalCost, order.currency)}</td><td className="p-2 text-right text-slate-500 text-[10px]">{order.currency}</td></tr>);
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        );
-      };
-
-      const CustomersView = () => {
-        const [customerFormData, setCustomerFormData] = useState(editingCustomer || { name: '', phone: '', type: 'Retail', pricePolicies: {} });
-        useEffect(() => { if (editingCustomer) setCustomerFormData(editingCustomer); }, [editingCustomer]);
-        const handlePriceChange = (routeId, val) => setCustomerFormData({ ...customerFormData, pricePolicies: { ...customerFormData.pricePolicies, [routeId]: val === '' ? undefined : Number(val) } });
-
-        return (
-          <div className="space-y-6 animate-fade-in">
-             <div className="flex justify-between items-center"><div><h2 className="text-2xl font-bold text-slate-800">Khách hàng</h2><p className="text-sm text-slate-500">Quản lý đối tác và giá</p></div><button onClick={() => { setEditingCustomer(null); setCustomerFormData({ name: '', phone: '', type: 'Retail', pricePolicies: {} }); setIsCustomerModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><Plus size={18} /> Thêm mới</button></div>
-             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"><table className="w-full text-sm text-left"><thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200"><tr><th className="p-4">Mã KH</th><th className="p-4">Tên</th><th className="p-4">Loại</th><th className="p-4">SĐT</th><th className="p-4 text-right">Công nợ</th><th className="p-4 text-center">Giá riêng</th><th className="p-4 text-center">Thao tác</th></tr></thead><tbody className="divide-y divide-slate-100">{customers.map(c => (<tr key={c.id} className="hover:bg-slate-50"><td className="p-4 text-slate-500 font-mono">{c.id}</td><td className="p-4 font-medium text-slate-800">{c.name}</td><td className="p-4"><span className="px-2 py-1 bg-slate-100 rounded text-xs text-slate-600">{c.type}</span></td><td className="p-4 text-slate-600">{c.phone}</td><td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.debt)}</td><td className="p-4 text-center">{Object.keys(c.pricePolicies).length > 0 ? <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">{Object.keys(c.pricePolicies).length} giá</span> : <span className="text-slate-400 text-xs">--</span>}</td><td className="p-4 text-center"><button onClick={() => { setEditingCustomer(c); setIsCustomerModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"><Edit size={16} /></button></td></tr>))}</tbody></table></div>
-             {isCustomerModalOpen && (
-              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
-                  <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50"><h3 className="text-xl font-bold text-slate-800">{editingCustomer ? 'Sửa Khách hàng' : 'Thêm Khách hàng'}</h3><button onClick={() => setIsCustomerModalOpen(false)}><X size={20}/></button></div>
-                  <div className="p-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="space-y-4">
-                      <div><label className="block text-sm font-medium mb-1">Tên</label><input className="w-full border rounded p-2 outline-none" value={customerFormData.name} onChange={e => setCustomerFormData({...customerFormData, name: e.target.value})}/></div>
-                      <div><label className="block text-sm font-medium mb-1">SĐT</label><input className="w-full border rounded p-2 outline-none" value={customerFormData.phone} onChange={e => setCustomerFormData({...customerFormData, phone: e.target.value})}/></div>
-                      <div><label className="block text-sm font-medium mb-1">Loại</label><select className="w-full border rounded p-2 outline-none" value={customerFormData.type} onChange={e => setCustomerFormData({...customerFormData, type: e.target.value})}><option value="Retail">Lẻ</option><option value="Agency">Đại lý</option></select></div>
-                    </div>
-                    <div className="md:col-span-2 space-y-4">
-                      <h4 className="font-bold text-slate-700 border-b pb-2">Bảng giá riêng (Ma trận giá)</h4>
-                      <div className="border rounded-lg overflow-hidden"><table className="w-full text-sm"><thead className="bg-slate-100"><tr><th className="p-3 text-left">Tuyến</th><th className="p-3 text-right">Giá chuẩn</th><th className="p-3 w-40">Giá riêng</th></tr></thead><tbody>{routes.map(r => (<tr key={r.id}><td className="p-3">{r.name}</td><td className="p-3 text-right text-slate-500">{formatCurrency(r.basePrice, r.currency)}</td><td className="p-3"><input type="number" className={`w-full border rounded px-2 py-1 text-right outline-none ${customerFormData.pricePolicies[r.id] ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold' : ''}`} placeholder="Mặc định" value={customerFormData.pricePolicies[r.id] ?? ''} onChange={e => handlePriceChange(r.id, e.target.value)}/></td></tr>))}</tbody></table></div>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-slate-50 border-t flex justify-end gap-3"><button onClick={() => setIsCustomerModalOpen(false)} className="px-4 py-2 rounded text-slate-600 hover:bg-slate-200">Hủy</button><button onClick={() => handleSaveCustomer(customerFormData)} className="px-6 py-2 bg-blue-600 text-white rounded shadow">Lưu</button></div>
-                </div>
-              </div>
-             )}
-          </div>
-        );
-      };
-
-      const RoutesView = () => {
-         const [routeFormData, setRouteFormData] = useState(editingRoute || { name: '', type: 'Air', basePrice: '', costPrice: '', estimatedDays: '', currency: 'VND' });
-         useEffect(() => { if (editingRoute) setRouteFormData(editingRoute); }, [editingRoute]);
-
-         return (
-          <div className="space-y-6 animate-fade-in">
-             <div className="flex justify-between items-center"><div><h2 className="text-2xl font-bold text-slate-800">Cấu hình Tuyến</h2><p className="text-sm text-slate-500">Quản lý giá gốc và giá bán</p></div><button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2" onClick={() => { setEditingRoute(null); setRouteFormData({ name: '', type: 'Air', basePrice: '', costPrice: '', estimatedDays: '', currency: 'VND' }); setIsRouteModalOpen(true); }}><Plus size={18}/> Thêm Tuyến</button></div>
-             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"><table className="w-full text-sm text-left"><thead className="bg-slate-50 text-slate-600 font-semibold"><tr><th className="p-4">Mã</th><th className="p-4">Tên Tuyến</th><th className="p-4">Loại</th><th className="p-4">Tiền tệ</th><th className="p-4 text-right">Giá Cost</th><th className="p-4 text-right">Giá Base</th><th className="p-4 text-center">Thao tác</th></tr></thead><tbody>{routes.map(r => (<tr key={r.id} className="hover:bg-slate-50"><td className="p-4 text-slate-500">{r.id}</td><td className="p-4 font-medium">{r.name}</td><td className="p-4">{r.type}</td><td className="p-4"><span className="bg-slate-100 px-2 py-1 rounded text-xs font-bold">{r.currency}</span></td><td className="p-4 text-right">{formatCurrency(r.costPrice, r.currency)}</td><td className="p-4 text-right font-bold text-blue-600">{formatCurrency(r.basePrice, r.currency)}</td><td className="p-4 text-center"><button onClick={() => { setEditingRoute(r); setIsRouteModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 rounded"><Edit size={16}/></button></td></tr>))}</tbody></table></div>
-             {isRouteModalOpen && (
-              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
-                  <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50"><h3 className="text-xl font-bold text-slate-800">{editingRoute ? 'Sửa Tuyến' : 'Thêm Tuyến'}</h3><button onClick={() => setIsRouteModalOpen(false)}><X size={20}/></button></div>
-                  <div className="p-6 space-y-4">
-                    <div><label className="block text-sm font-medium mb-1">Tên tuyến</label><input className="w-full border rounded p-2 outline-none" value={routeFormData.name} onChange={e => setRouteFormData({...routeFormData, name: e.target.value})}/></div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><label className="block text-sm font-medium mb-1">Loại</label><select className="w-full border rounded p-2 outline-none" value={routeFormData.type} onChange={e => setRouteFormData({...routeFormData, type: e.target.value})}><option value="Air">Air</option><option value="Road">Road</option></select></div>
-                      <div><label className="block text-sm font-medium mb-1">Tiền tệ</label><select className="w-full border rounded p-2 outline-none" value={routeFormData.currency} onChange={e => setRouteFormData({...routeFormData, currency: e.target.value})}><option value="VND">VND</option><option value="WON">WON</option></select></div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded border">
-                      <div><label className="block text-sm font-medium text-slate-600 mb-1">Giá Vốn</label><input type="number" className="w-full border rounded p-2 outline-none" value={routeFormData.costPrice} onChange={e => setRouteFormData({...routeFormData, costPrice: Number(e.target.value)})}/></div>
-                      <div><label className="block text-sm font-bold text-blue-700 mb-1">Giá Bán</label><input type="number" className="w-full border border-blue-300 rounded p-2 outline-none font-bold text-blue-700" value={routeFormData.basePrice} onChange={e => setRouteFormData({...routeFormData, basePrice: Number(e.target.value)})}/></div>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-slate-50 border-t flex justify-end gap-3"><button onClick={() => setIsRouteModalOpen(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded">Hủy</button><button onClick={() => handleSaveRoute(routeFormData)} className="px-6 py-2 bg-blue-600 text-white rounded shadow">Lưu</button></div>
-                </div>
-              </div>
-             )}
-          </div>
-         );
-      };
-
-      // --- RENDER LAYOUT ---
+      // -- RENDER --
       return (
-        <div className="flex h-screen bg-slate-100 font-sans text-slate-600 overflow-hidden">
-          <div className="w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col shadow-xl z-50">
-            <div className="p-6 border-b border-slate-700 flex items-center gap-3"><div className="bg-blue-500 p-2 rounded-lg"><Truck className="w-6 h-6 text-white" /></div><div><h1 className="font-bold text-lg leading-none">TMS PRO</h1><span className="text-xs text-slate-400">Logistics System</span></div></div>
-            <nav className="flex-1 p-4 space-y-2">
-              <button onClick={() => setActiveTab('orders')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab === 'orders' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}><Package size={20} /><span className="text-sm font-medium">Đơn hàng</span></button>
-              
-              {/* PHÂN QUYỀN MENU: Vận hành thấy Khách hàng */}
-              {['admin', 'operator', 'accountant'].includes(currentUserRole) && <button onClick={() => setActiveTab('customers')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab === 'customers' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}><Users size={20} /><span className="text-sm font-medium">Khách hàng</span></button>}
-              
-              {/* PHÂN QUYỀN MENU: Vận hành KHÔNG thấy Báo cáo */}
-              {['admin', 'accountant'].includes(currentUserRole) && <button onClick={() => setActiveTab('reports')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab === 'reports' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}><BarChart3 size={20} /><span className="text-sm font-medium">Báo cáo</span></button>}
-              
-              {/* PHÂN QUYỀN MENU: Chỉ Admin thấy Cấu hình Tuyến */}
-              {currentUserRole === 'admin' && <button onClick={() => setActiveTab('routes')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab === 'routes' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}><Settings size={20} /><span className="text-sm font-medium">Cấu hình Tuyến</span></button>}
+        <div className="flex h-screen w-full bg-slate-100 overflow-hidden">
+          
+          {/* Sidebar */}
+          <div className="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 h-full">
+            <div className="p-6 border-b border-slate-800 flex items-center gap-3">
+              <div className="p-2 bg-blue-600 rounded text-white">{Icons.Truck}</div>
+              <div><h1 className="font-bold text-white leading-tight">TMS PRO</h1><span className="text-[10px] uppercase tracking-wider text-slate-500">Logistics</span></div>
+            </div>
+            <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+              {canAccess('orders') && <button onClick={()=>setActiveTab('orders')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab==='orders' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Package} <span className="font-medium text-sm">Đơn hàng</span></button>}
+              {canAccess('reports') && <button onClick={()=>setActiveTab('reports')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab==='reports' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Chart} <span className="font-medium text-sm">Báo cáo</span></button>}
+              {canAccess('finance') && <button onClick={()=>setActiveTab('finance')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab==='finance' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Wallet} <span className="font-medium text-sm">Tài chính</span></button>}
+              {canAccess('customers') && <button onClick={()=>setActiveTab('customers')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab==='customers' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Users} <span className="font-medium text-sm">Khách hàng</span></button>}
+              {currentUserRole === 'admin' && <button onClick={()=>setActiveTab('routes')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab==='routes' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Settings} <span className="font-medium text-sm">Cấu hình Tuyến</span></button>}
+              {currentUserRole === 'admin' && <button onClick={()=>setActiveTab('system')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${activeTab==='system' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Shield} <span className="font-medium text-sm">Hệ thống</span></button>}
             </nav>
-            <div className="p-4 border-t border-slate-700 bg-slate-800">
-              <div className="flex items-center gap-3 mb-4"><div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">AD</div><div><p className="text-sm font-bold text-white">System User</p></div></div>
-              <label className="text-xs text-slate-400 mb-1 block">Chuyển vai trò (Demo):</label>
-              <select className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-slate-300 outline-none focus:border-blue-500" value={currentUserRole} onChange={(e) => { setCurrentUserRole(e.target.value); setActiveTab('orders'); }}>
-                <option value="admin">Quản trị viên (Admin)</option>
-                <option value="operator">Vận hành (Operator)</option>
-                <option value="accountant">Kế toán (Accountant)</option>
+            <div className="p-4 border-t border-slate-800 bg-slate-950">
+              <div className="flex items-center gap-3 mb-3"><div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold shadow">U</div><div><p className="text-xs font-bold text-white">System User</p><p className="text-[10px] text-slate-500">{currentUserRole.toUpperCase()}</p></div></div>
+              <label className="text-[10px] text-slate-500 block mb-1">Chuyển vai trò (Demo):</label>
+              <select className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-300 outline-none" value={currentUserRole} onChange={e=>{setCurrentUserRole(e.target.value); setActiveTab('orders');}}>
+                <option value="admin">Admin</option><option value="operator">Vận hành</option><option value="accountant">Kế toán</option>
               </select>
-              <button className="mt-3 w-full flex items-center justify-center gap-2 text-xs text-red-400 hover:text-red-300 py-2 hover:bg-slate-900 rounded transition-colors"><LogOut size={14}/> Đăng xuất</button>
             </div>
           </div>
-          <main className="flex-1 ml-64 p-6 overflow-hidden flex flex-col">
-            {activeTab === 'orders' && <OrdersView />}
-            {activeTab === 'reports' && <ReportsView />}
-            {activeTab === 'customers' && <CustomersView />}
-            {activeTab === 'routes' && <RoutesView />}
+
+          {/* Main Content Area */}
+          <main className="flex-1 h-full overflow-hidden p-6 relative flex flex-col">
+            {activeTab === 'orders' && <OrdersView orders={orders} customers={customers} currentUserRole={currentUserRole} onAdd={()=>handleOpenOrderModal()} onEdit={handleOpenOrderModal} />}
+            {activeTab === 'reports' && <ReportsView orders={orders} customers={customers} routes={routes} />}
+            {activeTab === 'finance' && <FinanceView orders={orders} customers={customers} />}
+            {activeTab === 'system' && <AccountsView users={users} onAdd={handleAddUser} onDelete={handleDeleteUser} />}
+            {activeTab === 'customers' && <CustomersView customers={customers} routes={routes} onAdd={()=>handleOpenCustomerModal()} onEdit={handleOpenCustomerModal} />}
+            {activeTab === 'routes' && <RoutesView routes={routes} onAdd={()=>handleOpenRouteModal()} onEdit={handleOpenRouteModal} />}
           </main>
-          {isOrderModalOpen && <OrderFormModal />}
+
+          {/* --- MODALS --- */}
+          
+          {/* Order Modal */}
+          {isOrderModalOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm animate-fade-in">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden">
+                <div className="px-6 py-4 border-b bg-slate-50 flex justify-between items-center"><h3 className="text-xl font-bold text-slate-800">{editingOrder ? 'Cập nhật' : 'Tạo'} Đơn hàng</h3><button onClick={()=>setIsOrderModalOpen(false)} className="text-slate-400 hover:text-red-500">{Icons.Close}</button></div>
+                <div className="p-6 overflow-y-auto flex-1">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-bold uppercase text-blue-600 border-b pb-1">1. Thông tin Kiện hàng</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2"><label className="text-xs font-semibold">Mã kiện</label><div className="relative"><span className="absolute left-2 top-2 text-slate-400">{Icons.Package}</span><input className="w-full border rounded p-1.5 pl-8 text-sm uppercase font-bold" value={oForm.packageCode} onChange={e=>setOForm({...oForm, packageCode:e.target.value})} placeholder="VD: HV5..." /></div></div>
+                        <div><label className="text-xs font-semibold">KG *</label><input type="number" className="w-full border rounded p-1.5 text-sm font-bold" value={oForm.weight} onChange={e=>setOForm({...oForm, weight:e.target.value})} /></div>
+                        <div><label className="text-xs font-semibold">Trạng thái</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.status} onChange={e=>setOForm({...oForm, status:e.target.value})}><option value="new">Mới</option><option value="arrived_center">Về kho</option><option value="shipping">Đang giao</option><option value="completed">Hoàn tất</option></select></div>
+                      </div>
+                      <div><label className="text-xs font-semibold">Tuyến *</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.routeId} onChange={e=>setOForm({...oForm, routeId:e.target.value})}><option value="">-- Chọn Tuyến --</option>{routes.map(r=><option key={r.id} value={r.id}>{r.name} ({r.currency})</option>)}</select></div>
+                      <div><label className="text-xs font-semibold">Khách hàng *</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.customerId} onChange={e=>setOForm({...oForm, customerId:e.target.value})}><option value="">-- Chọn Khách --</option>{customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+                      <div><label className="text-xs font-semibold">Ghi chú</label><textarea rows={2} className="w-full border rounded p-1.5 text-sm" value={oForm.senderNote} onChange={e=>setOForm({...oForm, senderNote:e.target.value})} /></div>
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-bold uppercase text-blue-600 border-b pb-1">2. Người nhận & Thanh toán</h4>
+                      <div className="space-y-3">
+                        <div><label className="text-xs font-semibold">Tên người nhận</label><input className="w-full border rounded p-1.5 text-sm" value={oForm.receiverName} onChange={e=>setOForm({...oForm, receiverName:e.target.value})} /></div>
+                        <div><label className="text-xs font-semibold">SĐT</label><input className="w-full border rounded p-1.5 text-sm" value={oForm.receiverPhone} onChange={e=>setOForm({...oForm, receiverPhone:e.target.value})} /></div>
+                        <div><label className="text-xs font-semibold">Địa chỉ</label><textarea rows={2} className="w-full border rounded p-1.5 text-sm" value={oForm.receiverAddress} onChange={e=>setOForm({...oForm, receiverAddress:e.target.value})} /></div>
+                      </div>
+                      <div className="bg-yellow-50 p-3 rounded border border-yellow-200">
+                        <label className="text-xs font-bold text-slate-700">Trạng thái Thanh toán</label>
+                        <select className="w-full border mt-1 rounded p-1.5 text-sm bg-white" value={oForm.paymentStatus} onChange={e=>setOForm({...oForm, paymentStatus:e.target.value})}>
+                          <option value="unpaid">⚪ Chưa thanh toán</option><option value="imported">🔵 Đã nhập file</option><option value="payment_sent">🟠 Đã gửi thanh toán</option><option value="paid">🟢 Đã thanh toán</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-4 flex flex-col">
+                      <h4 className="text-xs font-bold uppercase text-blue-600 border-b pb-1">3. Vận chuyển Nội địa</h4>
+                      <div className="bg-orange-50 p-3 rounded border border-orange-100 space-y-3">
+                        <div><label className="text-xs font-semibold">Đơn vị (Carrier)</label><select className="w-full border rounded p-1.5 text-sm bg-white" value={oForm.carrier} onChange={e=>setOForm({...oForm, carrier:e.target.value})}><option value="">-- Không --</option><option value="J&T">J&T Express</option><option value="Viettel">Viettel Post</option><option value="GHTK">GHTK</option><option value="Xe khách">Gửi xe</option></select></div>
+                        <div><label className="text-xs font-semibold">Mã vận đơn</label><input className="w-full border rounded p-1.5 text-sm" value={oForm.trackingCode} onChange={e=>setOForm({...oForm, trackingCode:e.target.value})} placeholder="VD: 8483..." /></div>
+                      </div>
+                      <div className="flex-1"></div>
+                      <div className="bg-slate-100 p-4 rounded border border-slate-200">
+                        <div className="flex justify-between text-sm mb-2"><span className="text-slate-500">Đơn giá áp dụng:</span><span className="font-semibold">{calc ? formatCurrency(calc.price, calc.currency) : 0}</span></div>
+                        <div className="flex justify-between items-center border-t border-slate-300 pt-2"><span className="font-bold text-slate-700">TỔNG TIỀN:</span><span className="text-xl font-bold text-blue-700">{calc ? formatCurrency(calc.total, calc.currency) : 0}</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 border-t bg-slate-50 flex justify-end gap-3"><button onClick={()=>setIsOrderModalOpen(false)} className="px-4 py-2 rounded text-slate-600 hover:bg-slate-200">Đóng</button><button onClick={handleSaveOrder} className="px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700">Lưu Đơn Hàng</button></div>
+              </div>
+            </div>
+          )}
+
+          {/* Customer Modal */}
+          {isCustomerModalOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col">
+                <div className="p-6 border-b flex justify-between"><h3 className="text-xl font-bold">{editingCustomer ? 'Sửa' : 'Thêm'} Khách hàng</h3><button onClick={()=>setIsCustomerModalOpen(false)}>{Icons.Close}</button></div>
+                <div className="p-6 overflow-y-auto flex-1 grid grid-cols-3 gap-6">
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium">Tên <input className="w-full border rounded p-2 mt-1" value={cForm.name} onChange={e=>setCForm({...cForm, name:e.target.value})}/></label>
+                    <label className="block text-sm font-medium">SĐT <input className="w-full border rounded p-2 mt-1" value={cForm.phone} onChange={e=>setCForm({...cForm, phone:e.target.value})}/></label>
+                    <label className="block text-sm font-medium">Loại <select className="w-full border rounded p-2 mt-1" value={cForm.type} onChange={e=>setCForm({...cForm, type:e.target.value})}><option value="Retail">Lẻ</option><option value="Agency">Đại lý</option></select></label>
+                  </div>
+                  <div className="col-span-2 border rounded-lg overflow-hidden flex flex-col">
+                    <div className="bg-slate-100 p-3 font-bold text-slate-700 border-b">Cấu hình Ma trận giá (Giá riêng)</div>
+                    <div className="overflow-auto flex-1 p-0">
+                      <table className="w-full text-sm"><thead className="bg-slate-50"><tr><th className="p-2 text-left">Tuyến</th><th className="p-2 text-right">Giá chuẩn</th><th className="p-2 w-32">Giá riêng</th></tr></thead>
+                        <tbody className="divide-y">{routes.map(r=>(<tr key={r.id}><td className="p-2">{r.name}</td><td className="p-2 text-right text-slate-400">{formatCurrency(r.basePrice, r.currency)}</td><td className="p-2"><input type="number" placeholder="Mặc định" className={`w-full border rounded px-2 py-1 text-right outline-none focus:border-blue-500 ${cForm.pricePolicies && cForm.pricePolicies[r.id] ? 'bg-blue-50 border-blue-300 font-bold text-blue-700' : ''}`} value={(cForm.pricePolicies && cForm.pricePolicies[r.id]) || ''} onChange={e=>updatePriceMatrix(r.id, e.target.value)} /></td></tr>))}</tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 border-t flex justify-end gap-2"><button onClick={()=>setIsCustomerModalOpen(false)} className="px-4 py-2 border rounded hover:bg-slate-50">Hủy</button><button onClick={handleSaveCustomer} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Lưu</button></div>
+              </div>
+            </div>
+          )}
+
+          {/* Route Modal */}
+          {isRouteModalOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+                <h3 className="text-xl font-bold mb-4">{editingRoute ? 'Sửa' : 'Thêm'} Tuyến</h3>
+                <div className="space-y-3">
+                  <label className="block text-sm">Tên tuyến <input className="w-full border rounded p-2" value={rForm.name} onChange={e=>setRForm({...rForm, name:e.target.value})}/></label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="block text-sm">Loại <select className="w-full border rounded p-2" value={rForm.type} onChange={e=>setRForm({...rForm, type:e.target.value})}><option value="Air">Air</option><option value="Road">Road</option></select></label>
+                    <label className="block text-sm">Tiền tệ <select className="w-full border rounded p-2" value={rForm.currency} onChange={e=>setRForm({...rForm, currency:e.target.value})}><option value="VND">VND</option><option value="WON">WON</option></select></label>
+                  </div>
+                  <label className="block text-sm">Giá Cost <input type="number" className="w-full border rounded p-2" value={rForm.costPrice} onChange={e=>setRForm({...rForm, costPrice:Number(e.target.value)})}/></label>
+                  <label className="block text-sm">Giá Bán (Base) <input type="number" className="w-full border rounded p-2 font-bold text-blue-700" value={rForm.basePrice} onChange={e=>setRForm({...rForm, basePrice:Number(e.target.value)})}/></label>
+                </div>
+                <div className="mt-6 flex justify-end gap-2"><button onClick={()=>setIsRouteModalOpen(false)} className="px-4 py-2 border rounded">Hủy</button><button onClick={handleSaveRoute} className="px-4 py-2 bg-blue-600 text-white rounded">Lưu</button></div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
