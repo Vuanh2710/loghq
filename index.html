@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TMS Logistics Pro - SRS Standard (Fixed)</title>
+  <title>TMS Logistics Pro - Final v3 Fixed</title>
   
   <!-- 1. Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,8 +31,6 @@
     .animate-fade-in { animation: fadeIn 0.3s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     .custom-checkbox { cursor: pointer; accent-color: #2563eb; width: 16px; height: 16px; }
-    
-    /* Timeline styles */
     .timeline-line { position: absolute; left: 15px; top: 24px; bottom: 0; width: 2px; background: #e2e8f0; z-index: 0; }
   </style>
 </head>
@@ -44,65 +42,41 @@
     const { useState, useMemo, useEffect } = React;
     const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } = Recharts;
 
-    // --- ICONS DEFINITION ---
+    // --- ICONS (Components) ---
     const IconWrapper = ({ children, className = "w-5 h-5" }) => (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
         {children}
       </svg>
     );
 
-    const TruckIcon = ({ className }) => <IconWrapper className={className}><path d="M5 18H3c-.6 0-1-.4-1-1V9c0-.6.4-1 1-1h9v10h-2"/><path d="M14 18H9"/><path d="M19 18h2c.6 0 1-.4 1-1v-5.6c0-.3-.1-.5-.3-.7l-2-2.9c-.2-.2-.5-.3-.8-.3H16v9h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></IconWrapper>;
-    const UsersIcon = ({ className }) => <IconWrapper className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconWrapper>;
-    const PackageIcon = ({ className }) => <IconWrapper className={className}><path d="m16.5 9.4-9-5.19"/><path d="m21 16-9 5.19-9-5.19"/><path d="m3.11 6.04 9 5.2 9-5.2"/><path d="M12 2v20"/></IconWrapper>;
-    const ChartIcon = ({ className }) => <IconWrapper className={className}><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></IconWrapper>;
-    const SettingsIcon = ({ className }) => <IconWrapper className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></IconWrapper>;
-    const PlusIcon = ({ className }) => <IconWrapper className={className}><path d="M5 12h14"/><path d="M12 5v14"/></IconWrapper>;
-    const SearchIcon = ({ className }) => <IconWrapper className={className}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></IconWrapper>;
-    const DollarIcon = ({ className }) => <IconWrapper className={className}><line x1="12" x2="12" y1="1" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconWrapper>;
-    const LogoutIcon = ({ className }) => <IconWrapper className={className}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></IconWrapper>;
-    const EditIcon = ({ className }) => <IconWrapper className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></IconWrapper>;
-    const CloseIcon = ({ className }) => <IconWrapper className={className}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconWrapper>;
-    const UploadIcon = ({ className }) => <IconWrapper className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></IconWrapper>;
-    const DownloadIcon = ({ className }) => <IconWrapper className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></IconWrapper>;
-    const FilterIcon = ({ className }) => <IconWrapper className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></IconWrapper>;
-    const PieIcon = ({ className }) => <IconWrapper className={className}><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></IconWrapper>;
-    const TrendDownIcon = ({ className }) => <IconWrapper className={className}><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></IconWrapper>;
-    const ShieldIcon = ({ className }) => <IconWrapper className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></IconWrapper>;
-    const WalletIcon = ({ className }) => <IconWrapper className={className}><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></IconWrapper>;
-    const FileTextIcon = ({ className }) => <IconWrapper className={className}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></IconWrapper>;
-    const TrashIcon = ({ className }) => <IconWrapper className={className}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></IconWrapper>;
-    const CalendarIcon = ({ className }) => <IconWrapper className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></IconWrapper>;
-    const HistoryIcon = ({ className }) => <IconWrapper className={className}><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></IconWrapper>;
+    const TruckIcon = () => <IconWrapper><path d="M5 18H3c-.6 0-1-.4-1-1V9c0-.6.4-1 1-1h9v10h-2"/><path d="M14 18H9"/><path d="M19 18h2c.6 0 1-.4 1-1v-5.6c0-.3-.1-.5-.3-.7l-2-2.9c-.2-.2-.5-.3-.8-.3H16v9h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></IconWrapper>;
+    const UsersIcon = () => <IconWrapper><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconWrapper>;
+    const PackageIcon = () => <IconWrapper><path d="m16.5 9.4-9-5.19"/><path d="m21 16-9 5.19-9-5.19"/><path d="m3.11 6.04 9 5.2 9-5.2"/><path d="M12 2v20"/></IconWrapper>;
+    const ChartIcon = () => <IconWrapper><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></IconWrapper>;
+    const SettingsIcon = () => <IconWrapper><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></IconWrapper>;
+    const PlusIcon = () => <IconWrapper><path d="M5 12h14"/><path d="M12 5v14"/></IconWrapper>;
+    const SearchIcon = () => <IconWrapper><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></IconWrapper>;
+    const DollarIcon = () => <IconWrapper><line x1="12" x2="12" y1="1" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconWrapper>;
+    const LogoutIcon = () => <IconWrapper><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></IconWrapper>;
+    const EditIcon = () => <IconWrapper><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></IconWrapper>;
+    const CloseIcon = () => <IconWrapper><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconWrapper>;
+    const UploadIcon = () => <IconWrapper><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></IconWrapper>;
+    const DownloadIcon = () => <IconWrapper><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></IconWrapper>;
+    const FilterIcon = () => <IconWrapper><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></IconWrapper>;
+    const PieIcon = () => <IconWrapper><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></IconWrapper>;
+    const TrendDownIcon = () => <IconWrapper><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></IconWrapper>;
+    const ShieldIcon = () => <IconWrapper><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></IconWrapper>;
+    const WalletIcon = () => <IconWrapper><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></IconWrapper>;
+    const FileTextIcon = () => <IconWrapper><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></IconWrapper>;
+    const TrashIcon = () => <IconWrapper><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></IconWrapper>;
+    const CalendarIcon = () => <IconWrapper><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></IconWrapper>;
+    const HistoryIcon = () => <IconWrapper><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></IconWrapper>;
 
-    // *** FIX: MAP ICONS TO OBJECT FOR LEGACY CALLS ***
-    const Icons = {
-      Truck: <TruckIcon />,
-      Users: <UsersIcon />,
-      Package: <PackageIcon />,
-      Chart: <ChartIcon />,
-      Settings: <SettingsIcon />,
-      Plus: <PlusIcon />,
-      Search: <SearchIcon />,
-      Dollar: <DollarIcon />,
-      Logout: <LogoutIcon />,
-      Edit: <EditIcon />,
-      Close: <CloseIcon />,
-      Upload: <UploadIcon />,
-      Download: <DownloadIcon />,
-      Filter: <FilterIcon />,
-      Pie: <PieIcon />,
-      TrendDown: <TrendDownIcon />,
-      Shield: <ShieldIcon />,
-      Wallet: <WalletIcon />,
-      FileText: <FileTextIcon />,
-      Trash: <TrashIcon />,
-      Calendar: <CalendarIcon />,
-      History: <HistoryIcon />
-    };
+    const Icons = { Truck: <TruckIcon/>, Users: <UsersIcon/>, Package: <PackageIcon/>, Chart: <ChartIcon/>, Settings: <SettingsIcon/>, Plus: <PlusIcon/>, Search: <SearchIcon/>, Dollar: <DollarIcon/>, Logout: <LogoutIcon/>, Edit: <EditIcon/>, Close: <CloseIcon/>, Upload: <UploadIcon/>, Download: <DownloadIcon/>, Filter: <FilterIcon/>, Pie: <PieIcon/>, TrendDown: <TrendDownIcon/>, Shield: <ShieldIcon/>, Wallet: <WalletIcon/>, FileText: <FileTextIcon/>, Trash: <TrashIcon/>, Calendar: <CalendarIcon/>, History: <HistoryIcon/> };
 
     // --- UTILS ---
     const formatCurrency = (amount, currency = 'VND') => {
-      if (!amount) return '0';
+      if (!amount || isNaN(amount)) return '0';
       if (currency === 'WON') return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(amount);
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
@@ -126,52 +100,14 @@
 
     const INITIAL_ORDERS = [
       { 
-        id: 'ORD-001', 
-        createdAt: '2025-08-14T08:30:00',
-        packageCode: 'HV5-1921', 
-        customerId: 'KH001', 
-        routeId: 'R001', 
-        weight: 1.9, 
-        unitPrice: 6500, 
-        totalCost: 12350, 
-        currency: 'WON',
-        profit: 4090, 
-        receiverName: 'Lan Anh', 
-        receiverPhone: '0946750124', 
-        receiverAddress: 'Thanh Hoá', 
-        area: 'TỈNH LẺ', 
-        carrier: 'J&T', 
-        trackingCode: '848392112', 
-        shipmentStatus: 'At Hub',
-        paymentStatus: 'Paid',
-        auditLog: [
-          { time: '2025-08-14T08:30:00', actor: 'Operator', action: 'Created Order' },
-          { time: '2025-08-15T10:00:00', actor: 'Operator', action: 'Update Shipment: At Hub' },
-          { time: '2025-08-16T14:20:00', actor: 'Accountant', action: 'Update Payment: Paid' }
-        ]
+        id: 'ORD-001', createdAt: '2025-08-14T08:30:00', packageCode: 'HV5-1921', customerId: 'KH001', routeId: 'R001', weight: 1.9, unitPrice: 6500, totalCost: 12350, currency: 'WON', profit: 4090, 
+        receiverName: 'Lan Anh', receiverPhone: '0946750124', receiverAddress: 'Thanh Hoá', area: 'TỈNH LẺ', carrier: 'J&T', trackingCode: '848392112', shipmentStatus: 'At Hub', paymentStatus: 'Paid',
+        auditLog: [{ time: '2025-08-14T08:30:00', actor: 'Operator', action: 'Created Order' }, { time: '2025-08-15T10:00:00', actor: 'Operator', action: 'Update Shipment: At Hub' }, { time: '2025-08-16T14:20:00', actor: 'Accountant', action: 'Update Payment: Paid' }]
       },
       { 
-        id: 'ORD-002', 
-        createdAt: '2025-08-14T09:15:00',
-        packageCode: 'HV5-1923', 
-        customerId: 'KH002', 
-        routeId: 'R001', 
-        weight: 8.7, 
-        unitPrice: 6000, 
-        totalCost: 52200, 
-        currency: 'WON', 
-        profit: 8700, 
-        receiverName: 'Nguyệt', 
-        receiverPhone: '0987314107', 
-        receiverAddress: 'Hà Nội', 
-        area: 'HN', 
-        carrier: 'Xe khách', 
-        trackingCode: 'XK-9988', 
-        shipmentStatus: 'Received', 
-        paymentStatus: 'File Imported',
-        auditLog: [
-          { time: '2025-08-14T09:15:00', actor: 'Operator', action: 'Created Order' }
-        ]
+        id: 'ORD-002', createdAt: '2025-08-14T09:15:00', packageCode: 'HV5-1923', customerId: 'KH002', routeId: 'R001', weight: 8.7, unitPrice: 6000, totalCost: 52200, currency: 'WON', profit: 8700, 
+        receiverName: 'Nguyệt', receiverPhone: '0987314107', receiverAddress: 'Hà Nội', area: 'HN', carrier: 'Xe khách', trackingCode: 'XK-9988', shipmentStatus: 'Received', paymentStatus: 'File Imported',
+        auditLog: [{ time: '2025-08-14T09:15:00', actor: 'Operator', action: 'Created Order' }]
       }
     ];
 
@@ -191,30 +127,15 @@
       const filteredList = useMemo(() => orders.filter(o => {
         let match = true;
         if (filter.customerId && o.customerId !== filter.customerId) match = false;
-        
-        const now = new Date();
-        const orderDate = new Date(o.createdAt);
-        if (filter.time === 'day') {
-           if (now.toDateString() !== orderDate.toDateString()) match = false;
-        } else if (filter.time === 'week') {
-           const oneWeekAgo = new Date(); oneWeekAgo.setDate(now.getDate() - 7);
-           if (orderDate < oneWeekAgo) match = false;
-        } else if (filter.time === 'month') {
-           if (now.getMonth() !== orderDate.getMonth() || now.getFullYear() !== orderDate.getFullYear()) match = false;
-        }
-        
+        const now = new Date(); const orderDate = new Date(o.createdAt);
+        if (filter.time === 'day') { if (now.toDateString() !== orderDate.toDateString()) match = false; } 
+        else if (filter.time === 'week') { const weekAgo = new Date(); weekAgo.setDate(now.getDate() - 7); if (orderDate < weekAgo) match = false; } 
+        else if (filter.time === 'month') { if (now.getMonth() !== orderDate.getMonth() || now.getFullYear() !== orderDate.getFullYear()) match = false; }
         return match;
       }), [orders, filter]);
 
-      const handleSelectAll = (e) => {
-        if (e.target.checked) setSelectedOrders(filteredList.map(o => o.id));
-        else setSelectedOrders([]);
-      };
-
-      const handleSelectOne = (id) => {
-        if (selectedOrders.includes(id)) setSelectedOrders(selectedOrders.filter(x => x !== id));
-        else setSelectedOrders([...selectedOrders, id]);
-      };
+      const handleSelectAll = (e) => { if (e.target.checked) setSelectedOrders(filteredList.map(o => o.id)); else setSelectedOrders([]); };
+      const handleSelectOne = (id) => { if (selectedOrders.includes(id)) setSelectedOrders(selectedOrders.filter(x => x !== id)); else setSelectedOrders([...selectedOrders, id]); };
 
       const getStatusBadge = (status, type) => {
         let color = 'bg-gray-100 text-gray-600 border-gray-200';
@@ -235,56 +156,23 @@
           <div className="flex justify-between items-end shrink-0">
             <div><h2 className="text-2xl font-bold text-slate-800">Quản lý Đơn hàng</h2><p className="text-sm text-slate-500">Theo dõi trạng thái và xử lý vận đơn</p></div>
             <div className="flex gap-2">
-              {selectedOrders.length > 0 && (
-                <button className="bg-white border border-blue-200 text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm text-sm font-medium hover:bg-blue-50 transition-colors animate-fade-in" onClick={()=>alert(`Đang xuất PDF hóa đơn cho ${selectedOrders.length} đơn hàng...`)}>
-                  {Icons.FileText} Export Invoice PDF ({selectedOrders.length})
-                </button>
-              )}
-              {currentUserRole !== 'accountant' && (
-                <button onClick={onAdd} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow text-sm font-medium transition-colors">{Icons.Plus} Tạo đơn mới</button>
-              )}
+              {selectedOrders.length > 0 && <button className="bg-white border border-blue-200 text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm text-sm font-medium hover:bg-blue-50 transition-colors animate-fade-in" onClick={()=>alert(`Xuất PDF hóa đơn cho ${selectedOrders.length} đơn!`)}>{Icons.FileText} Export Invoice ({selectedOrders.length})</button>}
+              {currentUserRole !== 'accountant' && <button onClick={onAdd} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow text-sm font-medium transition-colors">{Icons.Plus} Tạo đơn mới</button>}
             </div>
           </div>
-
           <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center shrink-0">
-            <div className="flex items-center gap-2 border-r pr-4">
-               <span className="text-xs font-bold text-slate-500 uppercase">Thời gian:</span>
-               <div className="flex gap-1">
-                 {['all', 'day', 'week', 'month'].map(t => (
-                   <button key={t} onClick={()=>setFilter({...filter, time: t})} className={`px-3 py-1 text-xs rounded-md ${filter.time === t ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-                     {t === 'all' ? 'Tất cả' : t === 'day' ? 'Hôm nay' : t === 'week' ? 'Tuần này' : 'Tháng này'}
-                   </button>
-                 ))}
-               </div>
-            </div>
+            <div className="flex items-center gap-2 border-r pr-4"><span className="text-xs font-bold text-slate-500 uppercase">Thời gian:</span><div className="flex gap-1">{['all', 'day', 'week', 'month'].map(t => <button key={t} onClick={()=>setFilter({...filter, time: t})} className={`px-3 py-1 text-xs rounded-md ${filter.time === t ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{t === 'all' ? 'Tất cả' : t === 'day' ? 'Hôm nay' : t === 'week' ? 'Tuần này' : 'Tháng này'}</button>)}</div></div>
             <div className="w-56"><select className="w-full border border-slate-300 rounded px-3 py-1.5 text-sm outline-none bg-white" value={filter.customerId} onChange={e => setFilter({...filter, customerId: e.target.value})}><option value="">-- Tất cả Khách hàng --</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
           </div>
-
           <div className="bg-white rounded-lg border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm min-h-0">
             <div className="overflow-auto flex-1 h-full w-full">
               <table className="w-full text-xs text-left border-collapse">
                 <thead className="bg-slate-100 text-slate-600 font-bold uppercase sticky top-0 z-20 shadow-sm">
-                  <tr>
-                    <th className="p-3 border-b border-r w-10 text-center"><input type="checkbox" className="custom-checkbox" onChange={handleSelectAll} checked={selectedOrders.length === filteredList.length && filteredList.length > 0} /></th>
-                    <th className="p-3 border-b border-r min-w-[120px]">Date</th>
-                    <th className="p-3 border-b border-r min-w-[100px]">Order ID</th>
-                    <th className="p-3 border-b border-r min-w-[80px]">Cust ID</th>
-                    <th className="p-3 border-b border-r min-w-[150px]">Customer Name</th>
-                    <th className="p-3 border-b border-r min-w-[80px]">Route</th>
-                    <th className="p-3 border-b border-r min-w-[60px] text-center">KG</th>
-                    <th className="p-3 border-b border-r min-w-[100px] text-right">Total</th>
-                    <th className="p-3 border-b border-r min-w-[150px]">Receiver</th>
-                    <th className="p-3 border-b border-r min-w-[150px]">Address/Area</th>
-                    <th className="p-3 border-b border-r min-w-[100px]">Domestic</th>
-                    <th className="p-3 border-b border-r min-w-[120px] text-center">Ship Status</th>
-                    <th className="p-3 border-b border-r min-w-[100px] text-center">Pay Status</th>
-                    <th className="p-3 border-b text-center w-[50px]">Act</th>
-                  </tr>
+                  <tr><th className="p-3 border-b border-r w-10 text-center"><input type="checkbox" className="custom-checkbox" onChange={handleSelectAll} checked={selectedOrders.length === filteredList.length && filteredList.length > 0} /></th><th className="p-3 border-b border-r min-w-[120px]">Date</th><th className="p-3 border-b border-r min-w-[100px]">Order ID</th><th className="p-3 border-b border-r min-w-[80px]">Cust ID</th><th className="p-3 border-b border-r min-w-[150px]">Customer</th><th className="p-3 border-b border-r min-w-[80px]">Route</th><th className="p-3 border-b border-r min-w-[60px] text-center">KG</th><th className="p-3 border-b border-r min-w-[100px] text-right">Total</th><th className="p-3 border-b border-r min-w-[150px]">Receiver</th><th className="p-3 border-b border-r min-w-[150px]">Address</th><th className="p-3 border-b border-r min-w-[100px]">Domestic</th><th className="p-3 border-b border-r min-w-[120px] text-center">Ship Status</th><th className="p-3 border-b border-r min-w-[100px] text-center">Pay Status</th><th className="p-3 border-b text-center w-[50px]">Act</th></tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredList.map((order, idx) => {
-                    const customer = customers.find(c => c.id === order.customerId);
-                    const route = routes.find(r => r.id === order.routeId);
+                    const customer = customers.find(c => c.id === order.customerId); const route = routes.find(r => r.id === order.routeId);
                     return (
                       <tr key={order.id} className={`hover:bg-blue-50 transition-colors ${selectedOrders.includes(order.id) ? 'bg-blue-50' : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50')}`}>
                         <td className="p-2 border-r text-center"><input type="checkbox" className="custom-checkbox" checked={selectedOrders.includes(order.id)} onChange={() => handleSelectOne(order.id)} /></td>
@@ -296,7 +184,7 @@
                         <td className="p-2 border-r text-center font-medium">{order.weight}</td>
                         <td className="p-2 border-r text-right font-bold text-slate-700">{formatCurrency(order.totalCost, order.currency)}</td>
                         <td className="p-2 border-r truncate max-w-[150px]"><div className="font-medium">{order.receiverName}</div><div className="text-[10px] text-slate-400">{order.receiverPhone}</div></td>
-                        <td className="p-2 border-r truncate max-w-[150px]"><div className="text-[10px]">{order.receiverAddress}</div><div className="font-bold text-[9px] bg-gray-100 w-fit px-1 rounded">{order.area}</div></td>
+                        <td className="p-2 border-r truncate max-w-[150px]"><div className="text-[10px]">{order.receiverAddress}</div></td>
                         <td className="p-2 border-r">{order.carrier ? <div className="flex flex-col"><span className="font-semibold text-[10px]">{order.carrier}</span><span className="text-[9px] font-mono bg-slate-100 px-1 rounded w-fit">{order.trackingCode}</span></div> : <span className="text-[10px] italic text-slate-400">--</span>}</td>
                         <td className="p-2 border-r text-center">{getStatusBadge(order.shipmentStatus, 'shipment')}</td>
                         <td className="p-2 border-r text-center">{getStatusBadge(order.paymentStatus, 'payment')}</td>
@@ -318,23 +206,10 @@
       const [rFilter, setRFilter] = useState({ start: '2025-08-01', end: '2025-08-31', customer: '' }); 
 
       useEffect(() => {
-        const today = new Date('2025-08-15');
-        const formatDate = (date) => date.toISOString().split('T')[0];
-        
-        if (dateFilterType === 'today') {
-          const d = formatDate(today);
-          setRFilter(prev => ({ ...prev, start: d, end: d }));
-        } else if (dateFilterType === '7days') {
-          const end = formatDate(today);
-          const start = new Date(today);
-          start.setDate(today.getDate() - 7);
-          setRFilter(prev => ({ ...prev, start: formatDate(start), end }));
-        } else if (dateFilterType === '30days') {
-          const end = formatDate(today);
-          const start = new Date(today);
-          start.setDate(today.getDate() - 30);
-          setRFilter(prev => ({ ...prev, start: formatDate(start), end }));
-        }
+        const today = new Date('2025-08-15'); const formatDate = (date) => date.toISOString().split('T')[0];
+        if (dateFilterType === 'today') { const d = formatDate(today); setRFilter(prev => ({ ...prev, start: d, end: d })); } 
+        else if (dateFilterType === '7days') { const end = formatDate(today); const start = new Date(today); start.setDate(today.getDate() - 7); setRFilter(prev => ({ ...prev, start: formatDate(start), end })); } 
+        else if (dateFilterType === '30days') { const end = formatDate(today); const start = new Date(today); start.setDate(today.getDate() - 30); setRFilter(prev => ({ ...prev, start: formatDate(start), end })); }
       }, [dateFilterType]);
       
       const reportData = useMemo(() => orders.filter(o => {
@@ -358,10 +233,7 @@
 
       const chartData = useMemo(() => {
         const map = {};
-        reportData.forEach(o => { 
-           const name = customers.find(c => c.id === o.customerId)?.name || 'Unknown';
-           map[name] = (map[name] || 0) + (o.currency === 'WON' ? o.totalCost * 20 : o.totalCost); 
-        });
+        reportData.forEach(o => { const name = customers.find(c => c.id === o.customerId)?.name || 'Unknown'; map[name] = (map[name] || 0) + (o.currency === 'WON' ? o.totalCost * 20 : o.totalCost); });
         return Object.entries(map).map(([k, v]) => ({ name: k, value: v })).sort((a,b) => b.value - a.value).slice(0, 5);
       }, [reportData, customers]);
 
@@ -369,21 +241,8 @@
         <div className="flex flex-col h-full space-y-4 animate-fade-in overflow-hidden w-full">
           <h2 className="text-2xl font-bold text-slate-800 shrink-0">Báo cáo Tài chính</h2>
           <div className="bg-white p-3 rounded-lg border shadow-sm flex gap-4 items-end shrink-0">
-            <div className="flex-1">
-              <label className="text-xs font-semibold text-slate-500 block mb-1">Thời gian</label>
-              <select className="border rounded px-2 py-1.5 text-sm w-full outline-none" value={dateFilterType} onChange={e=>setDateFilterType(e.target.value)}>
-                <option value="today">Hôm nay</option>
-                <option value="7days">7 ngày qua</option>
-                <option value="30days">30 ngày qua</option>
-                <option value="custom">Tùy chỉnh</option>
-              </select>
-            </div>
-            {dateFilterType === 'custom' && (
-              <>
-                <div><label className="text-xs font-semibold text-slate-500 block mb-1">Từ ngày</label><input type="date" className="border rounded px-2 py-1.5 text-sm" value={rFilter.start} onChange={e=>setRFilter({...rFilter, start: e.target.value})}/></div>
-                <div><label className="text-xs font-semibold text-slate-500 block mb-1">Đến ngày</label><input type="date" className="border rounded px-2 py-1.5 text-sm" value={rFilter.end} onChange={e=>setRFilter({...rFilter, end: e.target.value})}/></div>
-              </>
-            )}
+            <div className="flex-1"><label className="text-xs font-semibold text-slate-500 block mb-1">Thời gian</label><select className="border rounded px-2 py-1.5 text-sm w-full outline-none" value={dateFilterType} onChange={e=>setDateFilterType(e.target.value)}><option value="today">Hôm nay</option><option value="7days">7 ngày qua</option><option value="30days">30 ngày qua</option><option value="custom">Tùy chỉnh</option></select></div>
+            {dateFilterType === 'custom' && (<><div><label className="text-xs font-semibold text-slate-500 block mb-1">Từ ngày</label><input type="date" className="border rounded px-2 py-1.5 text-sm" value={rFilter.start} onChange={e=>setRFilter({...rFilter, start: e.target.value})}/></div><div><label className="text-xs font-semibold text-slate-500 block mb-1">Đến ngày</label><input type="date" className="border rounded px-2 py-1.5 text-sm" value={rFilter.end} onChange={e=>setRFilter({...rFilter, end: e.target.value})}/></div></>)}
             <div className="w-64"><label className="text-xs font-semibold text-slate-500 block mb-1">Khách hàng</label><select className="border rounded px-2 py-1.5 text-sm w-full" value={rFilter.customer} onChange={e=>setRFilter({...rFilter, customer: e.target.value})}><option value="">-- Tất cả --</option>{customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 shrink-0">
@@ -394,10 +253,7 @@
                 <div><p className="text-xs text-slate-500">Đã thu</p><p className="text-lg font-bold text-green-600">{formatCurrency(stats.won.paid, 'WON')}</p></div>
                 <div className="col-span-2 pt-3 border-t border-dashed grid grid-cols-2 gap-4">
                    <div><p className="text-xs font-bold text-red-500">Còn nợ</p><p className="text-xl font-bold text-red-600">{formatCurrency(stats.won.debt, 'WON')}</p></div>
-                   <div className="bg-green-50 p-2 rounded border border-green-100">
-                      <p className="text-xs text-green-600 font-semibold mb-1">Lợi nhuận thực tế</p>
-                      <p className="text-lg font-bold text-green-700">{formatCurrency(stats.won.profit, 'WON')}</p>
-                   </div>
+                   <div className="bg-green-50 p-2 rounded border border-green-100"><p className="text-xs text-green-600 font-semibold mb-1">Lợi nhuận thực tế</p><p className="text-lg font-bold text-green-700">{formatCurrency(stats.won.profit, 'WON')}</p></div>
                 </div>
               </div>
             </div>
@@ -408,30 +264,16 @@
                 <div><p className="text-xs text-slate-500">Đã thu</p><p className="text-lg font-bold text-green-600">{formatCurrency(stats.vnd.paid, 'VND')}</p></div>
                 <div className="col-span-2 pt-3 border-t border-dashed grid grid-cols-2 gap-4">
                    <div><p className="text-xs font-bold text-red-500">Còn nợ</p><p className="text-xl font-bold text-red-600">{formatCurrency(stats.vnd.debt, 'VND')}</p></div>
-                   <div className="bg-green-50 p-2 rounded border border-green-100">
-                      <p className="text-xs text-green-600 font-semibold mb-1">Lợi nhuận thực tế</p>
-                      <p className="text-lg font-bold text-green-700">{formatCurrency(stats.vnd.profit, 'VND')}</p>
-                   </div>
+                   <div className="bg-green-50 p-2 rounded border border-green-100"><p className="text-xs text-green-600 font-semibold mb-1">Lợi nhuận thực tế</p><p className="text-lg font-bold text-green-700">{formatCurrency(stats.vnd.profit, 'VND')}</p></div>
                 </div>
               </div>
             </div>
           </div>
           <div className="flex-1 min-h-0 flex gap-4">
-            <div className="w-1/3 bg-white rounded-xl shadow-sm border p-4 flex flex-col">
-              <h4 className="font-bold text-slate-700 mb-2 text-sm">Top Khách hàng (Quy đổi)</h4>
-              <div className="flex-1 min-h-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} layout="vertical" margin={{top:5, right:30, left:20, bottom:5}}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false}/><XAxis type="number" hide /><YAxis dataKey="name" type="category" width={80} tick={{fontSize: 10}} /><Tooltip formatter={(v)=>formatCurrency(v, 'VND')} /><Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+            <div className="w-1/3 bg-white rounded-xl shadow-sm border p-4 flex flex-col"><h4 className="font-bold text-slate-700 mb-2 text-sm">Top Khách hàng (Quy đổi)</h4><div className="flex-1 min-h-0"><ResponsiveContainer width="100%" height="100%"><BarChart data={chartData} layout="vertical" margin={{top:5, right:30, left:20, bottom:5}}><CartesianGrid strokeDasharray="3 3" horizontal={false}/><XAxis type="number" hide /><YAxis dataKey="name" type="category" width={80} tick={{fontSize: 10}} /><Tooltip formatter={(v)=>formatCurrency(v, 'VND')} /><Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} /></BarChart></ResponsiveContainer></div></div>
             <div className="w-2/3 bg-white rounded-xl shadow-sm border flex flex-col overflow-hidden">
               <div className="p-3 border-b bg-slate-50 font-bold text-slate-700 text-sm">Chi tiết giao dịch trong kỳ</div>
-              <div className="flex-1 overflow-auto">
-                <table className="w-full text-xs text-left"><thead className="bg-white sticky top-0 shadow-sm text-slate-500"><tr><th className="p-2">Ngày</th><th className="p-2">Mã đơn</th><th className="p-2">Khách hàng</th><th className="p-2 text-right">Doanh thu</th><th className="p-2 text-right">Loại tiền</th></tr></thead><tbody className="divide-y">{reportData.map(o => (<tr key={o.id} className="hover:bg-slate-50"><td className="p-2">{o.createdAt.split('T')[0]}</td><td className="p-2 font-medium text-blue-600">{o.packageCode}</td><td className="p-2 text-slate-600">{customers.find(c=>c.id===o.customerId)?.name}</td><td className="p-2 text-right font-bold">{formatCurrency(o.totalCost, o.currency)}</td><td className="p-2 text-right text-xs text-slate-400">{o.currency}</td></tr>))}</tbody></table>
-              </div>
+              <div className="flex-1 overflow-auto"><table className="w-full text-xs text-left"><thead className="bg-white sticky top-0 shadow-sm text-slate-500"><tr><th className="p-2">Ngày</th><th className="p-2">Mã đơn</th><th className="p-2">Khách hàng</th><th className="p-2 text-right">Doanh thu</th><th className="p-2 text-right">Loại tiền</th></tr></thead><tbody className="divide-y">{reportData.map(o => (<tr key={o.id} className="hover:bg-slate-50"><td className="p-2">{o.createdAt.split('T')[0]}</td><td className="p-2 font-medium text-blue-600">{o.packageCode}</td><td className="p-2 text-slate-600">{customers.find(c=>c.id===o.customerId)?.name}</td><td className="p-2 text-right font-bold">{formatCurrency(o.totalCost, o.currency)}</td><td className="p-2 text-right text-xs text-slate-400">{o.currency}</td></tr>))}</tbody></table></div>
             </div>
           </div>
         </div>
@@ -439,75 +281,49 @@
     };
 
     // 5. CUSTOMERS VIEW
-    const CustomersView = ({ customers, routes, onAdd, onEdit }) => {
-      return (
-        <div className="space-y-4 animate-fade-in h-full flex flex-col w-full">
-          <div className="flex justify-between items-center shrink-0"><h2 className="text-2xl font-bold text-slate-800">Khách hàng & Bảng giá</h2><button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex gap-2 text-sm">{Icons.Plus} Thêm mới</button></div>
-          <div className="bg-white rounded-lg border shadow-sm flex-1 overflow-hidden flex flex-col">
-            <div className="overflow-auto flex-1">
-              <table className="w-full text-sm text-left"><thead className="bg-slate-100 text-slate-600 sticky top-0"><tr><th className="p-4">Mã</th><th className="p-4">Tên khách hàng</th><th className="p-4">Loại</th><th className="p-4">SĐT</th><th className="p-4 text-right">Công nợ</th><th className="p-4 text-center">Giá riêng</th><th className="p-4 text-center">Sửa</th></tr></thead><tbody className="divide-y">{customers.map(c=>(<tr key={c.id} className="hover:bg-slate-50"><td className="p-4 text-slate-500">{c.id}</td><td className="p-4 font-medium">{c.name}</td><td className="p-4"><span className="bg-slate-100 px-2 py-1 rounded text-xs">{c.type}</span></td><td className="p-4">{c.phone}</td><td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.debt)}</td><td className="p-4 text-center">{Object.keys(c.pricePolicies).length > 0 ? <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">{Object.keys(c.pricePolicies).length} giá</span> : '-'}</td><td className="p-4 text-center"><button onClick={()=>onEdit(c)} className="text-blue-600">{Icons.Edit}</button></td></tr>))}</tbody></table>
-            </div>
-          </div>
-        </div>
-      );
-    };
+    const CustomersView = ({ customers, routes, onAdd, onEdit }) => (
+      <div className="space-y-4 animate-fade-in h-full flex flex-col w-full">
+        <div className="flex justify-between items-center shrink-0"><h2 className="text-2xl font-bold text-slate-800">Khách hàng & Bảng giá</h2><button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex gap-2 text-sm">{Icons.Plus} Thêm mới</button></div>
+        <div className="bg-white rounded-lg border shadow-sm flex-1 overflow-hidden flex flex-col"><div className="overflow-auto flex-1"><table className="w-full text-sm text-left"><thead className="bg-slate-100 text-slate-600 sticky top-0"><tr><th className="p-4">Mã</th><th className="p-4">Tên khách hàng</th><th className="p-4">Loại</th><th className="p-4">SĐT</th><th className="p-4 text-right">Công nợ</th><th className="p-4 text-center">Giá riêng</th><th className="p-4 text-center">Sửa</th></tr></thead><tbody className="divide-y">{customers.map(c=>(<tr key={c.id} className="hover:bg-slate-50"><td className="p-4 text-slate-500">{c.id}</td><td className="p-4 font-medium">{c.name}</td><td className="p-4"><span className="bg-slate-100 px-2 py-1 rounded text-xs">{c.type}</span></td><td className="p-4">{c.phone}</td><td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.debt)}</td><td className="p-4 text-center">{Object.keys(c.pricePolicies).length > 0 ? <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">{Object.keys(c.pricePolicies).length} giá</span> : '-'}</td><td className="p-4 text-center"><button onClick={()=>onEdit(c)} className="text-blue-600">{Icons.Edit}</button></td></tr>))}</tbody></table></div></div>
+      </div>
+    );
 
     // 6. ROUTES VIEW
-    const RoutesView = ({ routes, onAdd, onEdit }) => {
-      return (
-        <div className="space-y-4 animate-fade-in w-full">
-          <div className="flex justify-between items-center"><h2 className="text-2xl font-bold text-slate-800">Cấu hình Tuyến</h2><button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex gap-2 text-sm">{Icons.Plus} Thêm tuyến</button></div>
-          <div className="bg-white rounded-lg border shadow-sm overflow-hidden"><table className="w-full text-sm text-left"><thead className="bg-slate-100 text-slate-600"><tr><th className="p-4">Mã</th><th className="p-4">Tên Tuyến</th><th className="p-4">Loại</th><th className="p-4">Tiền tệ</th><th className="p-4 text-right">Giá Cost</th><th className="p-4 text-right">Giá Base</th><th className="p-4 text-center">Sửa</th></tr></thead><tbody className="divide-y">{routes.map(r=>(<tr key={r.id} className="hover:bg-slate-50"><td className="p-4 text-slate-500">{r.id}</td><td className="p-4 font-medium">{r.name}</td><td className="p-4">{r.type}</td><td className="p-4"><span className="bg-slate-100 px-2 py-1 rounded text-xs font-bold">{r.currency}</span></td><td className="p-4 text-right">{formatCurrency(r.costPrice, r.currency)}</td><td className="p-4 text-right font-bold text-blue-600">{formatCurrency(r.basePrice, r.currency)}</td><td className="p-4 text-center"><button onClick={()=>onEdit(r)} className="text-blue-600">{Icons.Edit}</button></td></tr>))}</tbody></table></div>
-        </div>
-      );
-    };
+    const RoutesView = ({ routes, onAdd, onEdit }) => (
+      <div className="space-y-4 animate-fade-in w-full">
+        <div className="flex justify-between items-center"><h2 className="text-2xl font-bold text-slate-800">Cấu hình Tuyến</h2><button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex gap-2 text-sm">{Icons.Plus} Thêm tuyến</button></div>
+        <div className="bg-white rounded-lg border shadow-sm overflow-hidden"><table className="w-full text-sm text-left"><thead className="bg-slate-100 text-slate-600"><tr><th className="p-4">Mã</th><th className="p-4">Tên Tuyến</th><th className="p-4">Loại</th><th className="p-4">Tiền tệ</th><th className="p-4 text-right">Giá Cost</th><th className="p-4 text-right">Giá Base</th><th className="p-4 text-center">Sửa</th></tr></thead><tbody className="divide-y">{routes.map(r=>(<tr key={r.id} className="hover:bg-slate-50"><td className="p-4 text-slate-500">{r.id}</td><td className="p-4 font-medium">{r.name}</td><td className="p-4">{r.type}</td><td className="p-4"><span className="bg-slate-100 px-2 py-1 rounded text-xs font-bold">{r.currency}</span></td><td className="p-4 text-right">{formatCurrency(r.costPrice, r.currency)}</td><td className="p-4 text-right font-bold text-blue-600">{formatCurrency(r.basePrice, r.currency)}</td><td className="p-4 text-center"><button onClick={()=>onEdit(r)} className="text-blue-600">{Icons.Edit}</button></td></tr>))}</tbody></table></div>
+      </div>
+    );
 
     // 7. FINANCE VIEW
     const FinanceView = ({ orders, customers }) => {
-      const debtData = useMemo(() => {
-        return customers.map(c => {
+      const debtData = useMemo(() => customers.map(c => {
           const customerOrders = orders.filter(o => o.customerId === c.id);
           const totalDebtWON = customerOrders.filter(o => o.currency === 'WON' && o.paymentStatus !== 'Paid').reduce((sum, o) => sum + o.totalCost, 0);
           const totalDebtVND = customerOrders.filter(o => o.currency === 'VND' && o.paymentStatus !== 'Paid').reduce((sum, o) => sum + o.totalCost, 0);
           return { ...c, totalDebtWON, totalDebtVND };
-        }).filter(c => c.totalDebtWON > 0 || c.totalDebtVND > 0);
-      }, [orders, customers]);
+        }).filter(c => c.totalDebtWON > 0 || c.totalDebtVND > 0), [orders, customers]);
 
       return (
         <div className="flex flex-col h-full space-y-4 animate-fade-in w-full">
           <div className="flex justify-between items-center"><h2 className="text-2xl font-bold text-slate-800">Tài chính & Công nợ</h2><button className="bg-green-600 text-white px-4 py-2 rounded-lg flex gap-2 text-sm font-medium hover:bg-green-700 shadow">{Icons.Dollar} Tạo Phiếu Thu</button></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
-                <div><p className="text-sm text-slate-500">Tổng công nợ (WON)</p><p className="text-2xl font-bold text-red-600">{formatCurrency(debtData.reduce((sum, c) => sum + c.totalDebtWON, 0), 'WON')}</p></div>
-                <div className="p-3 bg-red-50 rounded-full text-red-600">{Icons.TrendDown}</div>
-             </div>
-             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
-                <div><p className="text-sm text-slate-500">Tổng công nợ (VND)</p><p className="text-2xl font-bold text-red-600">{formatCurrency(debtData.reduce((sum, c) => sum + c.totalDebtVND, 0), 'VND')}</p></div>
-                <div className="p-3 bg-red-50 rounded-full text-red-600">{Icons.TrendDown}</div>
-             </div>
+             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between"><div><p className="text-sm text-slate-500">Tổng công nợ (WON)</p><p className="text-2xl font-bold text-red-600">{formatCurrency(debtData.reduce((sum, c) => sum + c.totalDebtWON, 0), 'WON')}</p></div><div className="p-3 bg-red-50 rounded-full text-red-600">{Icons.TrendDown}</div></div>
+             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between"><div><p className="text-sm text-slate-500">Tổng công nợ (VND)</p><p className="text-2xl font-bold text-red-600">{formatCurrency(debtData.reduce((sum, c) => sum + c.totalDebtVND, 0), 'VND')}</p></div><div className="p-3 bg-red-50 rounded-full text-red-600">{Icons.TrendDown}</div></div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm">
-            <div className="p-4 border-b bg-slate-50 font-bold text-slate-700">Danh sách Khách hàng còn nợ</div>
-            <div className="overflow-auto flex-1">
-              <table className="w-full text-sm text-left"><thead className="bg-white text-slate-600 sticky top-0 border-b"><tr><th className="p-4">Mã KH</th><th className="p-4">Khách hàng</th><th className="p-4">SĐT</th><th className="p-4 text-right">Nợ (WON)</th><th className="p-4 text-right">Nợ (VND)</th><th className="p-4 text-center">Thao tác</th></tr></thead>
-              <tbody className="divide-y">{debtData.map(c => (<tr key={c.id} className="hover:bg-slate-50"><td className="p-4 font-mono text-slate-500">{c.id}</td><td className="p-4 font-medium">{c.name}</td><td className="p-4">{c.phone}</td><td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.totalDebtWON, 'WON')}</td><td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.totalDebtVND, 'VND')}</td><td className="p-4 text-center"><button className="text-blue-600 hover:underline text-xs" onClick={()=>alert(`Xem chi tiết công nợ khách ${c.name}`)}>Chi tiết</button></td></tr>))}</tbody></table>
-            </div>
-          </div>
+          <div className="bg-white rounded-lg border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm"><div className="p-4 border-b bg-slate-50 font-bold text-slate-700">Danh sách Khách hàng còn nợ</div><div className="overflow-auto flex-1"><table className="w-full text-sm text-left"><thead className="bg-white text-slate-600 sticky top-0 border-b"><tr><th className="p-4">Mã KH</th><th className="p-4">Khách hàng</th><th className="p-4">SĐT</th><th className="p-4 text-right">Nợ (WON)</th><th className="p-4 text-right">Nợ (VND)</th><th className="p-4 text-center">Thao tác</th></tr></thead><tbody className="divide-y">{debtData.map(c => (<tr key={c.id} className="hover:bg-slate-50"><td className="p-4 font-mono text-slate-500">{c.id}</td><td className="p-4 font-medium">{c.name}</td><td className="p-4">{c.phone}</td><td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.totalDebtWON, 'WON')}</td><td className="p-4 text-right font-bold text-red-600">{formatCurrency(c.totalDebtVND, 'VND')}</td><td className="p-4 text-center"><button className="text-blue-600 hover:underline text-xs" onClick={()=>alert(`Xem chi tiết công nợ khách ${c.name}`)}>Chi tiết</button></td></tr>))}</tbody></table></div></div>
         </div>
       );
     };
 
     // 8. SYSTEM ACCOUNTS VIEW
-    const AccountsView = ({ users, onAdd, onDelete }) => {
-      return (
-        <div className="flex flex-col h-full space-y-4 animate-fade-in w-full">
-          <div className="flex justify-between items-center"><h2 className="text-2xl font-bold text-slate-800">Quản trị Hệ thống</h2><button onClick={onAdd} className="bg-slate-800 text-white px-4 py-2 rounded-lg flex gap-2 text-sm font-medium hover:bg-slate-900 shadow">{Icons.Plus} Thêm tài khoản</button></div>
-          <div className="bg-white rounded-lg border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm">
-            <table className="w-full text-sm text-left"><thead className="bg-slate-100 text-slate-600"><tr><th className="p-4">ID</th><th className="p-4">Tên hiển thị</th><th className="p-4">Email</th><th className="p-4">Vai trò</th><th className="p-4 text-center">Trạng thái</th><th className="p-4 text-center">Thao tác</th></tr></thead><tbody className="divide-y">{users.map(u => (<tr key={u.id} className="hover:bg-slate-50"><td className="p-4 font-mono text-slate-500">{u.id}</td><td className="p-4 font-medium">{u.name}</td><td className="p-4">{u.email}</td><td className="p-4"><span className={`px-2 py-1 rounded text-xs uppercase font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'accountant' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{u.role}</span></td><td className="p-4 text-center"><span className="text-green-600 text-xs font-bold flex items-center justify-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500"></span> Online</span></td><td className="p-4 text-center"><button onClick={()=>onDelete(u.id)} className="text-red-400 hover:text-red-600 p-2">{Icons.Trash}</button></td></tr>))}</tbody></table>
-          </div>
-        </div>
-      );
-    };
+    const AccountsView = ({ users, onAdd, onDelete }) => (
+      <div className="flex flex-col h-full space-y-4 animate-fade-in w-full">
+        <div className="flex justify-between items-center"><h2 className="text-2xl font-bold text-slate-800">Quản trị Hệ thống</h2><button onClick={onAdd} className="bg-slate-800 text-white px-4 py-2 rounded-lg flex gap-2 text-sm font-medium hover:bg-slate-900 shadow">{Icons.Plus} Thêm tài khoản</button></div>
+        <div className="bg-white rounded-lg border border-slate-200 flex-1 overflow-hidden flex flex-col shadow-sm"><table className="w-full text-sm text-left"><thead className="bg-slate-100 text-slate-600"><tr><th className="p-4">ID</th><th className="p-4">Tên hiển thị</th><th className="p-4">Email</th><th className="p-4">Vai trò</th><th className="p-4 text-center">Trạng thái</th><th className="p-4 text-center">Thao tác</th></tr></thead><tbody className="divide-y">{users.map(u => (<tr key={u.id} className="hover:bg-slate-50"><td className="p-4 font-mono text-slate-500">{u.id}</td><td className="p-4 font-medium">{u.name}</td><td className="p-4">{u.email}</td><td className="p-4"><span className={`px-2 py-1 rounded text-xs uppercase font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'accountant' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{u.role}</span></td><td className="p-4 text-center"><span className="text-green-600 text-xs font-bold flex items-center justify-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500"></span> Online</span></td><td className="p-4 text-center"><button onClick={()=>onDelete(u.id)} className="text-red-400 hover:text-red-600 p-2">{Icons.Trash}</button></td></tr>))}</tbody></table></div>
+      </div>
+    );
 
     // --- MAIN CONTROLLER ---
     function TMSApp() {
@@ -540,16 +356,8 @@
         return false;
       };
 
-      // --- HELPERS FOR ORDER STATUS LOGIC ---
-      const canMoveShipment = (targetStatus) => {
-        // Ops can move forward. 
-        // Logic simplified: Admin can do anything. Ops can do specific flows.
-        return true; 
-      };
-
       const canUpdatePayment = (targetStatus) => {
-        if (currentUserRole === 'admin') return true;
-        if (currentUserRole === 'accountant') return true;
+        if (currentUserRole === 'admin' || currentUserRole === 'accountant') return true;
         if (currentUserRole === 'operator' && targetStatus !== 'Paid') return true;
         return false;
       };
@@ -571,11 +379,10 @@
         const c = customers.find(x => x.id === oForm.customerId);
         if (!r || !oForm.weight) return;
         
-        const price = (c && c.pricePolicies[r.id]) ? c.pricePolicies[r.id] : r.basePrice;
+        const price = (c && c.pricePolicies && c.pricePolicies[r.id]) ? c.pricePolicies[r.id] : r.basePrice;
         const total = parseFloat(oForm.weight) * price;
         const profit = total - (parseFloat(oForm.weight) * r.costPrice);
         
-        // Audit Log Update
         const newLogEntry = {
             time: new Date().toISOString(),
             actor: currentUserRole === 'admin' ? 'Admin' : currentUserRole === 'operator' ? 'Operator' : 'Accountant',
@@ -586,10 +393,7 @@
           ...oForm,
           id: editingOrder ? editingOrder.id : `ORD-${Date.now()}`,
           createdAt: editingOrder ? editingOrder.createdAt : new Date().toISOString(),
-          unitPrice: price,
-          totalCost: total,
-          currency: r.currency,
-          profit: profit,
+          unitPrice: price, totalCost: total, currency: r.currency, profit: profit,
           auditLog: editingOrder ? [...(editingOrder.auditLog || []), newLogEntry] : [newLogEntry]
         };
 
@@ -598,44 +402,24 @@
         setIsOrderModalOpen(false);
       };
 
-      // Customer Handlers
-      const handleOpenCustomerModal = (customer = null) => {
-        setEditingCustomer(customer);
-        setCForm(customer || { name: '', phone: '', type: 'Retail', pricePolicies: {} });
-        setIsCustomerModalOpen(true);
-      };
+      const handleOpenCustomerModal = (customer = null) => { setEditingCustomer(customer); setCForm(customer || { name: '', phone: '', type: 'Retail', pricePolicies: {} }); setIsCustomerModalOpen(true); };
       const handleSaveCustomer = () => {
         if (editingCustomer) setCustomers(customers.map(c => c.id === editingCustomer.id ? { ...cForm, id: editingCustomer.id } : c));
         else setCustomers([...customers, { ...cForm, id: `KH${Date.now()}`, debt: 0 }]);
         setIsCustomerModalOpen(false);
       };
-      const updatePriceMatrix = (routeId, val) => {
-        setCForm(prev => ({ ...prev, pricePolicies: { ...prev.pricePolicies, [routeId]: val ? Number(val) : undefined } }));
-      };
+      const updatePriceMatrix = (routeId, val) => setCForm(prev => ({ ...prev, pricePolicies: { ...prev.pricePolicies, [routeId]: val ? Number(val) : undefined } }));
 
-      // Route Handlers
-      const handleOpenRouteModal = (route = null) => {
-        setEditingRoute(route);
-        setRForm(route || { name: '', type: 'Air', currency: 'VND', basePrice: 0, costPrice: 0 });
-        setIsRouteModalOpen(true);
-      };
+      const handleOpenRouteModal = (route = null) => { setEditingRoute(route); setRForm(route || { name: '', type: 'Air', currency: 'VND', basePrice: 0, costPrice: 0 }); setIsRouteModalOpen(true); };
       const handleSaveRoute = () => {
         if (editingRoute) setRoutes(routes.map(r => r.id === editingRoute.id ? { ...rForm, id: editingRoute.id } : r));
         else setRoutes([...routes, { ...rForm, id: `R${Date.now()}` }]);
         setIsRouteModalOpen(false);
       };
 
-      // User Handlers
-      const handleAddUser = () => {
-        const name = prompt("Nhập tên người dùng:");
-        const role = prompt("Nhập vai trò (admin/operator/accountant):");
-        if(name && role) setUsers([...users, { id: `U${Date.now()}`, name, email: `${name}@tms.com`, role }]);
-      };
-      const handleDeleteUser = (id) => {
-        if(confirm("Xóa người dùng này?")) setUsers(users.filter(u => u.id !== id));
-      };
+      const handleAddUser = () => { const name = prompt("Nhập tên:"); const role = prompt("Vai trò (admin/operator/accountant):"); if(name && role) setUsers([...users, { id: `U${Date.now()}`, name, email: `${name}@tms.com`, role }]); };
+      const handleDeleteUser = (id) => { if(confirm("Xóa?")) setUsers(users.filter(u => u.id !== id)); };
 
-      // Auto Calc Price in Modal
       const calc = useMemo(() => {
           if (!oForm.routeId || !oForm.weight) return null;
           const r = routes.find(x => x.id === oForm.routeId);
@@ -648,7 +432,6 @@
 
       return (
         <div className="flex h-screen w-full bg-slate-100 overflow-hidden">
-          
           {/* Sidebar */}
           <div className="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 h-full">
             <div className="p-6 border-b border-slate-800 flex items-center gap-3"><div className="p-2 bg-blue-600 rounded text-white">{Icons.Truck}</div><div><h1 className="font-bold text-white leading-tight">TMS PRO</h1><span className="text-[10px] uppercase tracking-wider text-slate-500">Logistics</span></div></div>
@@ -663,9 +446,7 @@
             <div className="p-4 border-t border-slate-800 bg-slate-950">
               <div className="flex items-center gap-3 mb-3"><div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold shadow">U</div><div><p className="text-xs font-bold text-white">System User</p><p className="text-[10px] text-slate-500">{currentUserRole.toUpperCase()}</p></div></div>
               <label className="text-[10px] text-slate-500 block mb-1">Chuyển vai trò (Demo):</label>
-              <select className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-300 outline-none" value={currentUserRole} onChange={e=>{setCurrentUserRole(e.target.value); setActiveTab('orders');}}>
-                <option value="admin">Admin</option><option value="operator">Vận hành</option><option value="accountant">Kế toán</option>
-              </select>
+              <select className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-300 outline-none" value={currentUserRole} onChange={e=>{setCurrentUserRole(e.target.value); setActiveTab('orders');}}><option value="admin">Admin</option><option value="operator">Vận hành</option><option value="accountant">Kế toán</option></select>
             </div>
           </div>
 
@@ -679,86 +460,41 @@
             {activeTab === 'routes' && <RoutesView routes={routes} onAdd={()=>handleOpenRouteModal()} onEdit={handleOpenRouteModal} />}
           </main>
 
-          {/* --- MODALS --- */}
-          
-          {/* Order Modal (Full SRS Features) */}
+          {/* Order Modal */}
           {isOrderModalOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm animate-fade-in">
               <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden">
                 <div className="px-6 py-4 border-b bg-slate-50 flex justify-between items-center"><h3 className="text-xl font-bold text-slate-800">{editingOrder ? 'Chi tiết' : 'Tạo'} Đơn hàng</h3><button onClick={()=>setIsOrderModalOpen(false)} className="text-slate-400 hover:text-red-500">{Icons.Close}</button></div>
                 <div className="flex-1 flex overflow-hidden">
-                    {/* Left: Form */}
                     <div className="w-2/3 p-6 overflow-y-auto border-r border-slate-100">
                         <div className="grid grid-cols-2 gap-6">
-                            {/* Block 1: Info */}
                             <div className="space-y-4">
                                 <h4 className="text-xs font-bold uppercase text-blue-600 border-b pb-1">1. Thông tin Kiện hàng</h4>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="col-span-2"><label className="text-xs font-semibold">Mã kiện</label><input className="w-full border rounded p-1.5 pl-8 text-sm font-bold" value={oForm.packageCode} onChange={e=>setOForm({...oForm, packageCode:e.target.value})} placeholder="VD: HV5..." /></div>
-                                    <div><label className="text-xs font-semibold">KG *</label><input type="number" className="w-full border rounded p-1.5 text-sm font-bold" value={oForm.weight} onChange={e=>setOForm({...oForm, weight:e.target.value})} /></div>
-                                    <div><label className="text-xs font-semibold">Tuyến *</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.routeId} onChange={e=>setOForm({...oForm, routeId:e.target.value})}>{routes.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></div>
+                                    <div className="col-span-2"><label className="text-xs font-semibold">Mã kiện</label><input className="w-full border rounded p-1.5 pl-8 text-sm font-bold" value={oForm.packageCode || ''} onChange={e=>setOForm({...oForm, packageCode:e.target.value})} placeholder="VD: HV5..." /></div>
+                                    <div><label className="text-xs font-semibold">KG *</label><input type="number" className="w-full border rounded p-1.5 text-sm font-bold" value={oForm.weight || ''} onChange={e=>setOForm({...oForm, weight:e.target.value})} /></div>
+                                    <div><label className="text-xs font-semibold">Tuyến *</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.routeId || ''} onChange={e=>setOForm({...oForm, routeId:e.target.value})}><option value="">-- Chọn --</option>{routes.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></div>
                                 </div>
-                                <div><label className="text-xs font-semibold">Khách hàng</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.customerId} onChange={e=>setOForm({...oForm, customerId:e.target.value})}>{customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-                                <div className="bg-slate-100 p-3 rounded mt-2">
-                                    <div className="flex justify-between text-sm"><span className="text-slate-500">Đơn giá:</span><span className="font-bold">{calc ? formatCurrency(calc.price, calc.currency) : 0}</span></div>
-                                    <div className="flex justify-between text-sm mt-1 pt-1 border-t border-slate-300"><span className="font-bold">TỔNG TIỀN:</span><span className="font-bold text-blue-700">{calc ? formatCurrency(calc.total, calc.currency) : 0}</span></div>
-                                </div>
+                                <div><label className="text-xs font-semibold">Khách hàng</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.customerId || ''} onChange={e=>setOForm({...oForm, customerId:e.target.value})}><option value="">-- Chọn --</option>{customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+                                <div className="bg-slate-100 p-3 rounded mt-2"><div className="flex justify-between text-sm"><span className="text-slate-500">Đơn giá:</span><span className="font-bold">{calc ? formatCurrency(calc.price, calc.currency) : 0}</span></div><div className="flex justify-between text-sm mt-1 pt-1 border-t border-slate-300"><span className="font-bold">TỔNG TIỀN:</span><span className="font-bold text-blue-700">{calc ? formatCurrency(calc.total, calc.currency) : 0}</span></div></div>
                             </div>
-                            
-                            {/* Block 2: Receiver & Status */}
                             <div className="space-y-4">
                                 <h4 className="text-xs font-bold uppercase text-blue-600 border-b pb-1">2. Người nhận & Trạng thái</h4>
-                                <div><label className="text-xs font-semibold">Tên người nhận</label><input className="w-full border rounded p-1.5 text-sm" value={oForm.receiverName} onChange={e=>setOForm({...oForm, receiverName:e.target.value})} /></div>
-                                <div><label className="text-xs font-semibold">SĐT / Địa chỉ</label><input className="w-full border rounded p-1.5 text-sm mb-2" value={oForm.receiverPhone} placeholder="SĐT" onChange={e=>setOForm({...oForm, receiverPhone:e.target.value})} /><textarea className="w-full border rounded p-1.5 text-sm" rows={2} value={oForm.receiverAddress} placeholder="Địa chỉ..." onChange={e=>setOForm({...oForm, receiverAddress:e.target.value})} /></div>
-                                
+                                <div><label className="text-xs font-semibold">Tên người nhận</label><input className="w-full border rounded p-1.5 text-sm" value={oForm.receiverName || ''} onChange={e=>setOForm({...oForm, receiverName:e.target.value})} /></div>
+                                <div><label className="text-xs font-semibold">SĐT / Địa chỉ</label><input className="w-full border rounded p-1.5 text-sm mb-2" value={oForm.receiverPhone || ''} placeholder="SĐT" onChange={e=>setOForm({...oForm, receiverPhone:e.target.value})} /><textarea className="w-full border rounded p-1.5 text-sm" rows={2} value={oForm.receiverAddress || ''} placeholder="Địa chỉ..." onChange={e=>setOForm({...oForm, receiverAddress:e.target.value})} /></div>
                                 <div className="space-y-3 pt-2">
-                                    <div>
-                                        <label className="text-xs font-bold text-slate-700">Trạng thái Vận chuyển</label>
-                                        <select className="w-full border mt-1 rounded p-1.5 text-sm bg-blue-50 text-blue-800 font-medium" value={oForm.shipmentStatus} onChange={e=>setOForm({...oForm, shipmentStatus:e.target.value})}>
-                                            {SHIPMENT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-bold text-slate-700">Trạng thái Thanh toán</label>
-                                        <select className="w-full border mt-1 rounded p-1.5 text-sm bg-yellow-50 text-yellow-800 font-medium" 
-                                            value={oForm.paymentStatus} 
-                                            onChange={e=>setOForm({...oForm, paymentStatus:e.target.value})}
-                                            disabled={!canUpdatePayment(e.target.value)}
-                                        >
-                                            {PAYMENT_STATUSES.map(s => <option key={s} value={s} disabled={currentUserRole === 'operator' && s === 'Paid'}>{s}</option>)}
-                                        </select>
-                                        {currentUserRole === 'operator' && <p className="text-[10px] text-red-400 mt-1 italic">* Operator không được set Paid</p>}
-                                    </div>
+                                    <div><label className="text-xs font-bold text-slate-700">Trạng thái Vận chuyển</label><select className="w-full border mt-1 rounded p-1.5 text-sm bg-blue-50 text-blue-800 font-medium" value={oForm.shipmentStatus || 'Received'} onChange={e=>setOForm({...oForm, shipmentStatus:e.target.value})}>{SHIPMENT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
+                                    <div><label className="text-xs font-bold text-slate-700">Trạng thái Thanh toán</label><select className="w-full border mt-1 rounded p-1.5 text-sm bg-yellow-50 text-yellow-800 font-medium" value={oForm.paymentStatus || 'Unpaid'} onChange={e=>setOForm({...oForm, paymentStatus:e.target.value})}>{PAYMENT_STATUSES.map(s => <option key={s} value={s} disabled={currentUserRole === 'operator' && s === 'Paid'}>{s}</option>)}</select></div>
                                 </div>
                             </div>
                         </div>
-                        {/* Domestic */}
-                        <div className="mt-6 pt-4 border-t">
-                             <h4 className="text-xs font-bold uppercase text-blue-600 mb-2">3. Vận chuyển Nội địa (Last Mile)</h4>
-                             <div className="flex gap-3">
-                                 <div className="w-1/2"><label className="text-xs font-semibold">Đơn vị</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.carrier} onChange={e=>setOForm({...oForm, carrier:e.target.value})}><option value="">-- Chọn --</option><option value="J&T">J&T</option><option value="Viettel">Viettel</option><option value="GHTK">GHTK</option></select></div>
-                                 <div className="w-1/2"><label className="text-xs font-semibold">Mã vận đơn</label><input className="w-full border rounded p-1.5 text-sm" value={oForm.trackingCode} onChange={e=>setOForm({...oForm, trackingCode:e.target.value})} /></div>
-                             </div>
-                        </div>
+                        <div className="mt-6 pt-4 border-t"><h4 className="text-xs font-bold uppercase text-blue-600 mb-2">3. Vận chuyển Nội địa (Last Mile)</h4><div className="flex gap-3"><div className="w-1/2"><label className="text-xs font-semibold">Đơn vị</label><select className="w-full border rounded p-1.5 text-sm" value={oForm.carrier || ''} onChange={e=>setOForm({...oForm, carrier:e.target.value})}><option value="">-- Chọn --</option><option value="J&T">J&T</option><option value="Viettel">Viettel</option><option value="GHTK">GHTK</option></select></div><div className="w-1/2"><label className="text-xs font-semibold">Mã vận đơn</label><input className="w-full border rounded p-1.5 text-sm" value={oForm.trackingCode || ''} onChange={e=>setOForm({...oForm, trackingCode:e.target.value})} /></div></div></div>
                     </div>
-
-                    {/* Right: History Timeline */}
                     <div className="w-1/3 bg-slate-50 p-6 overflow-y-auto border-l border-slate-200">
                         <h4 className="text-xs font-bold uppercase text-slate-500 mb-4 flex items-center gap-2">{Icons.History} Lịch sử xử lý</h4>
                         <div className="relative pl-4 space-y-6">
                             <div className="timeline-line"></div>
-                            {oForm.auditLog && oForm.auditLog.length > 0 ? (
-                                oForm.auditLog.map((log, idx) => (
-                                    <div key={idx} className="relative z-10">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full absolute -left-[21px] top-1.5 ring-4 ring-slate-50"></div>
-                                        <p className="text-xs text-slate-400 mb-0.5">{new Date(log.time).toLocaleString('vi-VN')}</p>
-                                        <p className="text-sm font-semibold text-slate-700">{log.action}</p>
-                                        <p className="text-xs text-blue-600 bg-blue-100 w-fit px-1.5 rounded mt-1">{log.actor}</p>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-xs text-slate-400 italic">Chưa có lịch sử</p>
-                            )}
+                            {oForm.auditLog && oForm.auditLog.length > 0 ? ( oForm.auditLog.map((log, idx) => ( <div key={idx} className="relative z-10"><div className="w-2 h-2 bg-blue-500 rounded-full absolute -left-[21px] top-1.5 ring-4 ring-slate-50"></div><p className="text-xs text-slate-400 mb-0.5">{new Date(log.time).toLocaleString('vi-VN')}</p><p className="text-sm font-semibold text-slate-700">{log.action}</p><p className="text-xs text-blue-600 bg-blue-100 w-fit px-1.5 rounded mt-1">{log.actor}</p></div> )) ) : ( <p className="text-xs text-slate-400 italic">Chưa có lịch sử</p> )}
                         </div>
                     </div>
                 </div>
